@@ -1,0 +1,51 @@
+<section class="pagina estreita">
+  <a mat-button routerLink="/admin/fornecedores" class="voltar">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para fornecedores
+  </a>
+
+  <header class="topo-pagina">
+    <h1>{{ id() ? 'Editar fornecedor' : 'Novo fornecedor' }}</h1>
+  </header>
+
+  @if (erroGeral()) {
+    <p class="mensagem-erro">{{ erroGeral() }}</p>
+  }
+
+  @if (carregando()) {
+    <p>Carregando...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
+      <mat-form-field appearance="outline" class="c4">
+        <mat-label>Razão social</mat-label>
+        <input matInput formControlName="razaoSocial" placeholder="Ex.: Distribuidora Fit LTDA" />
+        <mat-error>{{ mensagemErro('razaoSocial') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>CNPJ</mat-label>
+        <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" maxlength="18" (blur)="formatarCnpj()" />
+        <mat-error>{{ mensagemErro('cnpj') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>Telefone</mat-label>
+        <input matInput formControlName="telefone" placeholder="(63) 99999-0000" maxlength="16" (blur)="formatarTelefone()" />
+        <mat-error>{{ mensagemErro('telefone') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c4">
+        <mat-label>E-mail (opcional)</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="compras@fornecedor.com.br" />
+        <mat-error>{{ mensagemErro('email') }}</mat-error>
+      </mat-form-field>
+
+      <div class="botoes">
+        <a mat-stroked-button routerLink="/admin/fornecedores">Cancelar</a>
+        <button mat-flat-button type="submit" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

@@ -1,0 +1,81 @@
+.login {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 40px;
+  align-items: center;
+}
+
+.lado-marca h1 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.lado-marca strong {
+  background: var(--aura-gradiente);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lado-marca ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.lado-marca li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lado-marca mat-icon {
+  color: var(--aura-sucesso);
+}
+
+.formulario-login {
+  display: grid;
+  gap: 4px;
+  padding: 28px;
+}
+
+.formulario-login h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+
+.esqueci {
+  justify-self: end;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.entrar {
+  height: 48px;
+}
+
+.cadastro {
+  text-align: center;
+}
+
+.aviso-prototipo {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--aura-texto-suave);
+  background: var(--mat-sys-surface-container);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+@media (max-width: 860px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+}

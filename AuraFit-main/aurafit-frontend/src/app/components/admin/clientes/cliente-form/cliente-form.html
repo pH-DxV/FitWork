@@ -1,0 +1,181 @@
+<section class="pagina estreita">
+  <a mat-button routerLink="/admin/clientes" class="voltar">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para clientes
+  </a>
+
+  <header class="topo-pagina">
+    <h1>{{ id() ? 'Editar cliente' : 'Novo cliente' }}</h1>
+  </header>
+
+  @if (erroGeral()) {
+    <p class="mensagem-erro">{{ erroGeral() }}</p>
+  }
+
+  @if (carregando()) {
+    <p>Carregando...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
+      <!-- ================= Dados pessoais ================= -->
+      <h2>Dados pessoais</h2>
+
+      <mat-form-field appearance="outline" class="c4">
+        <mat-label>Nome completo</mat-label>
+        <input matInput formControlName="nome" autocomplete="name" />
+        <mat-error>{{ mensagemErro('nome') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="nome@email.com" autocomplete="email" />
+        <mat-error>{{ mensagemErro('email') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>CPF</mat-label>
+        <input matInput formControlName="cpf" placeholder="000.000.000-00" maxlength="14" (blur)="formatarCpf()" />
+        <mat-error>{{ mensagemErro('cpf') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>Data de nascimento</mat-label>
+        <input matInput type="date" formControlName="dataNascimento" />
+        <mat-hint>Idade mínima: {{ idadeMinima }} anos.</mat-hint>
+        <mat-error>{{ mensagemErro('dataNascimento') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>Gênero (opcional)</mat-label>
+        <mat-select formControlName="genero">
+          <mat-option value="">Não informado</mat-option>
+          @for (genero of generos; track genero) {
+            <mat-option [value]="genero">{{ genero }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- ================= Telefones ================= -->
+      <h2>Telefones</h2>
+
+      <ng-container formArrayName="telefones">
+      @for (telefone of telefones.controls; track telefone; let i = $index) {
+        <div class="telefone" [formGroupName]="i">
+          <mat-form-field appearance="outline">
+            <mat-label>DDD</mat-label>
+            <input matInput formControlName="codigoArea" placeholder="63" maxlength="2" />
+            <mat-error>{{ mensagemErro('telefones.' + i + '.codigoArea') || 'DDD inválido.' }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Número</mat-label>
+            <input matInput formControlName="numero" placeholder="99999-0000" maxlength="10" (blur)="formatarNumero(i)" />
+            <mat-error>
+              {{ mensagemErro('telefones.' + i + '.numero') === 'Formato inválido.' ? 'Use 8 ou 9 dígitos.' : mensagemErro('telefones.' + i + '.numero') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="whatsapp">WhatsApp</mat-checkbox>
+
+          <button mat-icon-button type="button" (click)="removerTelefone(i)" [disabled]="telefones.length === 1"
+                  aria-label="Remover telefone">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+      </ng-container>
+
+      <button mat-button type="button" class="adicionar" (click)="adicionarTelefone()">
+        <mat-icon>add</mat-icon>
+        Adicionar telefone
+      </button>
+
+      <!-- ================= Endereço ================= -->
+      <h2>Endereço</h2>
+
+      <ng-container formGroupName="endereco">
+        <mat-form-field appearance="outline" class="c2">
+          <mat-label>CEP</mat-label>
+          <input matInput formControlName="cep" placeholder="77001-002" maxlength="9" (blur)="buscarCep()" />
+          <button mat-icon-button matSuffix type="button" aria-label="Buscar CEP"
+                  [disabled]="buscandoCep()" (click)="buscarCep(true)">
+            <mat-icon>search</mat-icon>
+          </button>
+          <mat-hint>Preenche o endereço automaticamente.</mat-hint>
+          <mat-error>{{ mensagemErro('endereco.cep') }}</mat-error>
+        </mat-form-field>
+
+        <div class="c2 situacao-cep">
+          @if (buscandoCep()) {
+            <mat-spinner diameter="20" />
+            <span>Consultando CEP...</span>
+          }
+          @if (enderecoPeloCep() && !buscandoCep()) {
+            <span class="ok"><mat-icon>check_circle</mat-icon> Endereço encontrado</span>
+            <button mat-button type="button" (click)="liberarCidadeUf()">Editar cidade/UF</button>
+          }
+          @if (avisoCep()) {
+            <span class="aviso">{{ avisoCep() }}</span>
+          }
+          @if (falhaRedeCep()) {
+            <span class="aviso">Não foi possível consultar o CEP.</span>
+            <button mat-stroked-button type="button" (click)="buscarCep(true)">Tentar novamente</button>
+          }
+        </div>
+
+        <mat-form-field appearance="outline" class="c3">
+          <mat-label>Logradouro</mat-label>
+          <input matInput formControlName="logradouro" />
+          <mat-error>{{ mensagemErro('endereco.logradouro') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="c1">
+          <mat-label>Número</mat-label>
+          <input matInput formControlName="numero" />
+          <mat-error>{{ mensagemErro('endereco.numero') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="c2">
+          <mat-label>Complemento (opcional)</mat-label>
+          <input matInput formControlName="complemento" />
+          <mat-error>{{ mensagemErro('endereco.complemento') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="c2">
+          <mat-label>Bairro</mat-label>
+          <input matInput formControlName="bairro" />
+          <mat-error>{{ mensagemErro('endereco.bairro') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="c3">
+          <mat-label>Cidade (município)</mat-label>
+          <input matInput formControlName="cidade" />
+          <mat-error>{{ mensagemErro('endereco.cidade') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="c1">
+          <mat-label>UF</mat-label>
+          <mat-select formControlName="uf">
+            <mat-select-trigger>{{ endereco.controls.uf.value }}</mat-select-trigger>
+            @for (estado of estados(); track estado.id) {
+              <mat-option [value]="estado.sigla">{{ estado.sigla }} — {{ estado.nome }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ mensagemErro('endereco.uf') }}</mat-error>
+        </mat-form-field>
+      </ng-container>
+
+      <!-- ================= Preferências ================= -->
+      <div class="opcoes">
+        <mat-slide-toggle formControlName="aceitaNovidades">Receber novidades e promoções</mat-slide-toggle>
+        <mat-slide-toggle formControlName="ativo">Cliente ativo</mat-slide-toggle>
+      </div>
+
+      <div class="botoes">
+        <a mat-stroked-button routerLink="/admin/clientes">Cancelar</a>
+        <button mat-flat-button type="submit" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

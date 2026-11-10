@@ -1,0 +1,59 @@
+<header class="cabecalho">
+  <div class="faixa">Frete grátis em compras acima de R$ 199 · Parcele em até 6x sem juros</div>
+
+  <div class="barra">
+    <a class="marca" routerLink="/loja">
+      <span class="logo">A</span>
+      <span>Aura<strong>Fit</strong></span>
+    </a>
+
+    <form class="busca" (submit)="$event.preventDefault(); pesquisar(campo.value)">
+      <mat-icon>search</mat-icon>
+      <input #campo type="search" placeholder="Buscar whey, creatina, barra de proteína..." aria-label="Buscar produtos" />
+    </form>
+
+    <nav class="acoes">
+      @if (sessao.usuario(); as usuario) {
+        <button mat-button [matMenuTriggerFor]="menuUsuario">
+          <mat-icon>account_circle</mat-icon>
+          Olá, {{ usuario.nome.split(' ')[0] }}
+        </button>
+        <mat-menu #menuUsuario="matMenu">
+          <a mat-menu-item routerLink="/loja/perfil"><mat-icon>person</mat-icon> Meu perfil</a>
+          <button mat-menu-item (click)="sair()"><mat-icon>logout</mat-icon> Sair</button>
+        </mat-menu>
+      } @else {
+        <a mat-button routerLink="/loja/login">
+          <mat-icon>login</mat-icon>
+          Entrar
+        </a>
+      }
+
+      <a mat-icon-button routerLink="/loja/carrinho" aria-label="Carrinho">
+        <mat-icon aria-hidden="false" [matBadge]="carrinho.quantidadeTotal()" [matBadgeHidden]="carrinho.quantidadeTotal() === 0"
+                  matBadgeColor="accent">shopping_bag</mat-icon>
+      </a>
+
+      <a mat-stroked-button routerLink="/admin" class="admin">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Admin
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>
+
+<footer class="rodape">
+  <div>
+    <strong>AuraFit</strong> — suplementos para a sua melhor versão.
+  </div>
+  <div class="links">
+    <a routerLink="/loja">Produtos</a>
+    <a routerLink="/loja/carrinho">Carrinho</a>
+    <a routerLink="/loja/perfil">Minha conta</a>
+  </div>
+  <small>© {{ ano }} AuraFit · Projeto acadêmico — Tópicos 2 (UNITINS)</small>
+</footer>

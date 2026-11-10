@@ -1,0 +1,49 @@
+<section class="pagina estreita">
+  <a mat-button routerLink="/admin/marcas" class="voltar">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar para marcas
+  </a>
+
+  <header class="topo-pagina">
+    <h1>{{ id() ? 'Editar marca' : 'Nova marca' }}</h1>
+  </header>
+
+  @if (erroGeral()) {
+    <p class="mensagem-erro">{{ erroGeral() }}</p>
+  }
+
+  @if (carregando()) {
+    <p>Carregando...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
+      <mat-form-field appearance="outline" class="c4">
+        <mat-label>Nome</mat-label>
+        <input matInput formControlName="nome" placeholder="Ex.: Growth Supplements" />
+        <mat-error>{{ mensagemErro('nome') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>CNPJ</mat-label>
+        <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" maxlength="18" (blur)="formatarCnpj()" />
+        <mat-error>{{ mensagemErro('cnpj') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="c2">
+        <mat-label>E-mail de contato (opcional)</mat-label>
+        <input matInput type="email" formControlName="emailContato" placeholder="contato@marca.com.br" />
+        <mat-error>{{ mensagemErro('emailContato') }}</mat-error>
+      </mat-form-field>
+
+      <mat-slide-toggle formControlName="ativa" class="c4">
+        Marca ativa (pode receber novos produtos)
+      </mat-slide-toggle>
+
+      <div class="botoes">
+        <a mat-stroked-button routerLink="/admin/marcas">Cancelar</a>
+        <button mat-flat-button type="submit" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

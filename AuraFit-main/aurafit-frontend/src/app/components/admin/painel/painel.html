@@ -1,0 +1,26 @@
+<section class="pagina">
+  <div class="destaque">
+    <div>
+      <h1>Olá! 👋</h1>
+      <p>Gerencie o catálogo de suplementos, as marcas e os clientes da AuraFit.</p>
+    </div>
+    <div class="atalhos">
+      <a mat-flat-button routerLink="/admin/produtos/novo"><mat-icon>add</mat-icon> Novo produto</a>
+      <a mat-stroked-button routerLink="/admin/clientes/novo"><mat-icon>person_add</mat-icon> Novo cliente</a>
+    </div>
+  </div>
+
+  @if (erro()) {
+    <p class="mensagem-erro">{{ erro() }}</p>
+  }
+
+  <div class="indicadores">
+    @for (item of indicadores(); track item.rotulo) {
+      <a class="cartao indicador" [routerLink]="item.rota">
+        <mat-icon>{{ item.icone }}</mat-icon>
+        <strong>{{ item.valor }}</strong>
+        <span>{{ item.rotulo }}</span>
+      </a>
+    }
+  </div>
+</section>

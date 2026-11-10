@@ -1,0 +1,70 @@
+.destaque {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--aura-gradiente);
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.destaque h1 {
+  margin: 0 0 4px;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.destaque p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.atalhos {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.atalhos a[mat-flat-button] {
+  background: #fff;
+  color: #4c1d95;
+}
+
+.atalhos a[mat-stroked-button] {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.indicador {
+  display: grid;
+  gap: 4px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.indicador:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(76, 29, 149, 0.12);
+}
+
+.indicador mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.indicador strong {
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.indicador span {
+  color: var(--aura-texto-suave);
+}

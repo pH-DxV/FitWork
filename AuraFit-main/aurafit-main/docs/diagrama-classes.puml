@@ -1,0 +1,125 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide methods
+
+abstract class DefaultEntity {
+  - id: Long
+  - dataCadastro: LocalDateTime
+  - dataAlteracao: LocalDateTime
+}
+
+class Categoria {
+  - nome: String
+  - descricao: String
+}
+
+class Marca {
+  - nome: String
+  - cnpj: String
+  - emailContato: String
+  - ativa: boolean
+}
+
+class Fornecedor {
+  - razaoSocial: String
+  - cnpj: String
+  - telefone: String
+  - email: String
+}
+
+class Sabor {
+  - nome: String
+  - descricao: String
+}
+
+class Produto {
+  - nome: String
+  - descricao: String
+  - preco: BigDecimal
+  - pesoGramas: Integer
+  - estoque: Integer
+  - tipoProteina: TipoProteina
+  - ativo: boolean
+}
+
+enum TipoProteina {
+  CONCENTRADO
+  ISOLADO
+  HIDROLISADO
+  BLEND
+  VEGETAL
+}
+
+class Pessoa {
+  - nome: String
+  - email: String
+  - cpf: String
+  - dataNascimento: LocalDate
+  - genero: String
+}
+
+class Telefone {
+  - codigoArea: String
+  - numero: String
+  - whatsapp: boolean
+}
+
+class Endereco {
+  - cep: String
+  - logradouro: String
+  - numero: String
+  - complemento: String
+  - bairro: String
+}
+
+class Cliente {
+  - aceitaNovidades: boolean
+  - ativo: boolean
+}
+
+class Municipio {
+  - nome: String
+  - codigoIbge: String
+}
+
+class Estado {
+  - nome: String
+  - sigla: String
+  - regiao: Regiao
+}
+
+enum Regiao {
+  CENTRO_OESTE
+  NORTE
+  NORDESTE
+  SUDESTE
+  SUL
+}
+
+DefaultEntity <|-- Categoria
+DefaultEntity <|-- Marca
+DefaultEntity <|-- Fornecedor
+DefaultEntity <|-- Sabor
+DefaultEntity <|-- Produto
+DefaultEntity <|-- Pessoa
+DefaultEntity <|-- Telefone
+DefaultEntity <|-- Endereco
+DefaultEntity <|-- Cliente
+DefaultEntity <|-- Municipio
+DefaultEntity <|-- Estado
+
+Produto "0..*" --> "1" Categoria
+Produto "0..*" --> "1" Marca
+Produto "0..*" --> "1" Fornecedor
+Produto "0..*" --> "0..*" Sabor
+Produto ..> TipoProteina
+
+Cliente "1" --> "1" Pessoa : composição
+Pessoa "1" *-- "1..*" Telefone
+Pessoa "1" *-- "0..1" Endereco
+Endereco "0..*" --> "1" Municipio
+Municipio "0..*" --> "1" Estado
+Estado ..> Regiao
+
+note "Próxima etapa: Usuario (login/JWT) e Funcionario\nreutilizando Pessoa por composição." as N1
+@enduml

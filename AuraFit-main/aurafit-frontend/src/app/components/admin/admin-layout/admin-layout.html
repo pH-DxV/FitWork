@@ -1,0 +1,50 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav
+    #menu
+    class="menu"
+    [mode]="telaPequena() ? 'over' : 'side'"
+    [opened]="!telaPequena()"
+  >
+    <a class="marca" routerLink="/admin">
+      <span class="logo">A</span>
+      <span>
+        <strong>AuraFit</strong>
+        <small>Painel administrativo</small>
+      </span>
+    </a>
+
+    <mat-nav-list>
+      <a mat-list-item routerLink="/admin" [routerLinkActiveOptions]="{ exact: true }"
+         routerLinkActive="ativo" (click)="telaPequena() && menu.close()">
+        <mat-icon matListItemIcon>space_dashboard</mat-icon>
+        <span matListItemTitle>Início</span>
+      </a>
+
+      <div class="secao">Cadastros</div>
+      @for (item of menuCadastros; track item.rota) {
+        <a mat-list-item [routerLink]="item.rota" routerLinkActive="ativo"
+           (click)="telaPequena() && menu.close()">
+          <mat-icon matListItemIcon>{{ item.icone }}</mat-icon>
+          <span matListItemTitle>{{ item.rotulo }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <a mat-stroked-button class="ir-loja" routerLink="/loja">
+      <mat-icon>storefront</mat-icon>
+      Ver a loja
+    </a>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    @if (telaPequena()) {
+      <mat-toolbar class="barra">
+        <button mat-icon-button (click)="menu.toggle()" aria-label="Abrir menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span>AuraFit Admin</span>
+      </mat-toolbar>
+    }
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>

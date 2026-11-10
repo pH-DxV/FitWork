@@ -1,0 +1,43 @@
+<section class="login">
+  <div class="lado-marca">
+    <h1>Bem-vindo(a) de volta à <strong>AuraFit</strong></h1>
+    <p>Acompanhe seus pedidos, salve endereços e aproveite ofertas exclusivas.</p>
+    <ul>
+      <li><mat-icon>check_circle</mat-icon> Histórico de pedidos</li>
+      <li><mat-icon>check_circle</mat-icon> Checkout mais rápido</li>
+      <li><mat-icon>check_circle</mat-icon> Cupons para clientes</li>
+    </ul>
+  </div>
+
+  <form class="cartao formulario-login" [formGroup]="form" (ngSubmit)="entrar()">
+    <h2>Entrar</h2>
+
+    <mat-form-field appearance="outline">
+      <mat-label>E-mail</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" />
+      <mat-icon matPrefix>mail</mat-icon>
+      <mat-error>{{ mensagemErro('email') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Senha</mat-label>
+      <input matInput [type]="mostrarSenha() ? 'text' : 'password'" formControlName="senha" autocomplete="current-password" />
+      <mat-icon matPrefix>lock</mat-icon>
+      <button mat-icon-button matSuffix type="button" (click)="mostrarSenha.set(!mostrarSenha())"
+              [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'">
+        <mat-icon>{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error>{{ mensagemErro('senha') }}</mat-error>
+    </mat-form-field>
+
+    <button mat-button type="button" class="esqueci">Esqueci minha senha</button>
+
+    <button mat-flat-button type="submit" class="entrar">Entrar</button>
+
+    <p class="cadastro">Ainda não tem conta? <a routerLink="/loja/perfil">Criar conta</a></p>
+    <p class="aviso-prototipo">
+      <mat-icon>info</mat-icon>
+      Protótipo: a autenticação real (Usuário + JWT) será implementada na próxima etapa.
+    </p>
+  </form>
+</section>

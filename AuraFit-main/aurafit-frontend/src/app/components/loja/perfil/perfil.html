@@ -1,0 +1,53 @@
+<section class="pagina">
+  @if (sessao.usuario(); as usuario) {
+    <div class="cabecalho-perfil cartao">
+      <div class="avatar">{{ iniciais(usuario.nome) }}</div>
+      <div>
+        <h1>{{ usuario.nome }}</h1>
+        <p class="subtitulo">{{ usuario.email }}</p>
+      </div>
+      <button mat-stroked-button (click)="sair()"><mat-icon>logout</mat-icon> Sair</button>
+    </div>
+
+    <mat-tab-group class="cartao abas" animationDuration="150ms">
+      <mat-tab label="Meus pedidos">
+        <div class="lista-pedidos">
+          @for (pedido of sessao.pedidos(); track pedido.numero) {
+            <div class="pedido">
+              <div>
+                <strong>{{ pedido.numero }}</strong>
+                <span class="texto-secundario">{{ pedido.data | date: 'dd/MM/yyyy' }} · {{ pedido.itens }} item(ns) · {{ pedido.formaPagamento }}</span>
+              </div>
+              <span class="selo" [class.alerta]="pedido.situacao !== 'Entregue'">{{ pedido.situacao }}</span>
+              <strong>{{ pedido.total | currency: 'BRL' }}</strong>
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Dados pessoais">
+        <div class="dados">
+          <p><span>Nome</span>{{ usuario.nome }}</p>
+          <p><span>E-mail</span>{{ usuario.email }}</p>
+          <p><span>CPF</span>***.***.***-**</p>
+          <p><span>Telefone</span>(63) 9****-****</p>
+          <button mat-stroked-button><mat-icon>edit</mat-icon> Editar dados</button>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Endereços">
+        <div class="dados">
+          <p><span>Principal</span>Quadra 101 Sul, Av. LO 1, 10 — Plano Diretor Sul, Palmas/TO · 77001-002</p>
+          <button mat-stroked-button><mat-icon>add_location_alt</mat-icon> Adicionar endereço</button>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  } @else {
+    <div class="cartao nao-logado">
+      <mat-icon>account_circle</mat-icon>
+      <h1>Minha conta</h1>
+      <p>Entre para acompanhar seus pedidos e gerenciar seus dados.</p>
+      <a mat-flat-button routerLink="/loja/login">Entrar</a>
+    </div>
+  }
+</section>

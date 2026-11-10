@@ -1,0 +1,76 @@
+<section class="pagina">
+  <header class="topo-pagina">
+    <div>
+      <h1>Fornecedores</h1>
+      <p class="subtitulo">Distribuidores que abastecem o estoque da loja.</p>
+    </div>
+    <a mat-flat-button routerLink="/admin/fornecedores/novo">
+      <mat-icon>add</mat-icon>
+      Novo fornecedor
+    </a>
+  </header>
+
+  <div class="cartao">
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Buscar por razão social</mat-label>
+      <input matInput #campoBusca (input)="buscar(campoBusca.value)" placeholder="Ex.: Distribuidora" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    @if (erro()) {
+      <p class="mensagem-erro">{{ erro() }}</p>
+    }
+
+    <div class="tabela-container">
+      <table mat-table [dataSource]="fornecedores()" class="tabela">
+        <ng-container matColumnDef="razaoSocial">
+          <th mat-header-cell *matHeaderCellDef>Razão social</th>
+          <td mat-cell *matCellDef="let fornecedor"><strong>{{ fornecedor.razaoSocial }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="cnpj">
+          <th mat-header-cell *matHeaderCellDef>CNPJ</th>
+          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.cnpj | formato: 'cnpj' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="telefone">
+          <th mat-header-cell *matHeaderCellDef>Telefone</th>
+          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.telefone | formato: 'telefone' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>E-mail</th>
+          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.email ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let fornecedor" class="acoes">
+            <a mat-icon-button [routerLink]="['/admin/fornecedores/editar', fornecedor.id]" aria-label="Editar">
+              <mat-icon>edit</mat-icon>
+            </a>
+            <button mat-icon-button (click)="excluir(fornecedor)" aria-label="Excluir">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
+            {{ carregando() ? 'Carregando...' : 'Nenhum fornecedor encontrado.' }}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalItems()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="mudarPagina($event)"
+    />
+  </div>
+</section>

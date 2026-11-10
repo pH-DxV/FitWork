@@ -1,0 +1,99 @@
+<section class="hero">
+  <div class="hero-texto">
+    <span class="etiqueta">Nova coleção 2026</span>
+    <h1>Desperte a sua <em>aura</em> de performance.</h1>
+    <p>Whey, proteínas vegetais e suplementos selecionados das melhores marcas, com entrega para todo o Brasil.</p>
+  </div>
+  <div class="hero-selos">
+    <div><mat-icon>local_shipping</mat-icon> Frete grátis acima de R$ 199</div>
+    <div><mat-icon>verified</mat-icon> Produtos originais</div>
+    <div><mat-icon>bolt</mat-icon> Envio em 24h</div>
+  </div>
+</section>
+
+<section class="conteudo">
+  <div class="filtros-loja">
+    <mat-chip-listbox aria-label="Tipo de proteína">
+      <mat-chip-option [selected]="tipoSelecionado() === null" (click)="selecionarTipo(null)">Todos</mat-chip-option>
+      @for (tipo of tipos(); track tipo.id) {
+        <mat-chip-option [selected]="tipoSelecionado() === tipo.id" (click)="selecionarTipo(tipo.id)">
+          {{ tipo.nome }}
+        </mat-chip-option>
+      }
+    </mat-chip-listbox>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="categoria">
+      <mat-label>Categoria</mat-label>
+      <mat-select [value]="categoriaSelecionada()" (selectionChange)="selecionarCategoria($event.value)">
+        <mat-option [value]="null">Todas</mat-option>
+        @for (categoria of categorias(); track categoria.id) {
+          <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (busca()) {
+    <p class="resultado">Resultados para <strong>“{{ busca() }}”</strong> — {{ totalItems() }} produto(s)
+      <a routerLink="/loja">limpar busca</a></p>
+  }
+
+  @if (erro()) {
+    <p class="mensagem-erro">{{ erro() }}</p>
+  }
+
+  <div class="grade">
+    @for (produto of produtos(); track produto.id) {
+      <article class="card" [class.indisponivel]="!disponivel(produto)">
+        <div class="imagem" [attr.data-tipo]="produto.tipoProteina.id">
+          <span class="sigla">{{ iniciais(produto) }}</span>
+          <span class="tipo">{{ produto.tipoProteina.nome }}</span>
+          <span class="peso">{{ produto.pesoGramas }} g</span>
+        </div>
+
+        <div class="info">
+          <small>{{ produto.marca.nome }} · {{ produto.categoria.nome }}</small>
+          <h3>{{ produto.nome }}</h3>
+
+          @if (produto.sabores.length) {
+            <mat-chip-listbox class="sabores" aria-label="Sabor">
+              @for (sabor of produto.sabores; track sabor.id) {
+                <mat-chip-option
+                  [selected]="(saborEscolhido[produto.id] ?? produto.sabores[0].nome) === sabor.nome"
+                  (click)="escolherSabor(produto, sabor.nome)">
+                  {{ sabor.nome }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
+          }
+
+          <div class="preco">
+            <strong>{{ produto.preco | currency: 'BRL' }}</strong>
+            <span>ou 6x de {{ produto.preco / 6 | currency: 'BRL' }}</span>
+          </div>
+
+          @if (disponivel(produto)) {
+            <button mat-flat-button (click)="adicionar(produto)">
+              <mat-icon>add_shopping_cart</mat-icon>
+              Adicionar
+            </button>
+          } @else {
+            <button mat-stroked-button disabled>Indisponível</button>
+          }
+        </div>
+      </article>
+    } @empty {
+      @if (!carregando()) {
+        <p class="vazio">Nenhum produto encontrado.</p>
+      }
+    }
+  </div>
+
+  <mat-paginator
+    [length]="totalItems()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[4, 8, 12]"
+    (page)="mudarPagina($event)"
+  />
+</section>
