@@ -9,7 +9,7 @@
 
     <form class="busca" (submit)="$event.preventDefault(); pesquisar(campo.value)">
       <mat-icon>search</mat-icon>
-      <input #campo type="search" placeholder="Buscar whey, creatina, barra de proteína..." aria-label="Buscar produtos" />
+      <input #campo type="search" [value]="termoBusca()" placeholder="Buscar whey, creatina, barra de proteína..." aria-label="Buscar produtos" />
     </form>
 
     <nav class="acoes">

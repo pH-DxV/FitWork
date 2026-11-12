@@ -38,4 +38,5 @@ export interface FiltroProduto {
   idTipoProteina?: number | null;
   idCategoria?: number | null;
   idMarca?: number | null;
+  ativo?: boolean | null;
 }

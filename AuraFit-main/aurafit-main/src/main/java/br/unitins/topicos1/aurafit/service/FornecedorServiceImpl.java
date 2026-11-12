@@ -76,6 +76,8 @@ public class FornecedorServiceImpl implements FornecedorService {
     }
 
     private void validarDados(FornecedorRequestDTO dto, Long id) {
+        Textos.validarTamanhoUtil(dto.razaoSocial(), "razaoSocial", 2, 120,
+                "A razão social deve conter entre 2 e 120 caracteres.");
         if (fornecedorRepository.findByCnpjExceptId(dto.cnpj(), id) != null) {
             throw ValidationException.of("cnpj", "Já existe um fornecedor cadastrado com esse CNPJ.");
         }

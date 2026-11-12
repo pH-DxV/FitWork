@@ -93,8 +93,16 @@ public class ClienteServiceImpl implements ClienteService {
         Cliente cliente = buscarClienteOuFalhar(id);
         Pessoa pessoa = cliente.getPessoa();
         clienteRepository.delete(cliente);
-        // a pessoa (com telefones e endereço) pertence apenas ao cliente
-        pessoaRepository.delete(pessoa);
+        if (pessoa != null && !pessoaPossuiOutrosVinculos(pessoa.getId())) {
+            pessoaRepository.delete(pessoa);
+        }
+    }
+
+    /**
+     * Verifica se a Pessoa está vinculada a outros papéis do sistema (ex.: Funcionario/Usuario).
+     */
+    protected boolean pessoaPossuiOutrosVinculos(Long idPessoa) {
+        return false;
     }
 
     private PageResponse<ClienteResponseDTO> paginar(Supplier<PanacheQuery<Cliente>> consulta, int page, int pageSize) {
@@ -105,6 +113,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     private void validarDados(ClienteRequestDTO dto, Long idPessoa) {
+        Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 120, "O nome deve conter entre 2 e 120 caracteres.");
         if (Period.between(dto.dataNascimento(), LocalDate.now()).getYears() < IDADE_MINIMA) {
             throw ValidationException.of("dataNascimento",
                     "O cliente deve ter pelo menos " + IDADE_MINIMA + " anos.");

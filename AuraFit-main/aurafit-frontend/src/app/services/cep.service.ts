@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, timeout } from 'rxjs';
 import { EnderecoViaCep } from '../models/endereco-viacep.model';
 
 /** Consulta de CEP na API externa ViaCEP. */
@@ -12,6 +12,9 @@ export class CepService {
   consultar(cep: string): Observable<EnderecoViaCep | null> {
     return this.http
       .get<EnderecoViaCep>(`https://viacep.com.br/ws/${cep}/json/`)
-      .pipe(map((resposta) => (resposta.erro ? null : resposta)));
+      .pipe(
+        timeout(8000),
+        map((resposta) => (resposta.erro ? null : resposta)),
+      );
   }
 }

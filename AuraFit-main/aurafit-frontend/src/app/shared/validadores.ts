@@ -3,10 +3,23 @@ import { somenteNumeros } from './formatos';
 
 /** Validadores reutilizáveis do front-end (espelham as regras do back-end). */
 export class Validadores {
-  /** Impede valores formados apenas por espaços. */
+  /** Impede valores formados apenas por espaços ou com menos de 2 caracteres úteis após trim(). */
   static naoSomenteEspacos(control: AbstractControl): ValidationErrors | null {
     const valor = control.value as string | null;
-    return valor && valor.trim().length === 0 ? { somenteEspacos: true } : null;
+    if (!valor) return null;
+    const limpo = valor.trim();
+    if (limpo.length === 0) return { somenteEspacos: true };
+    if (limpo.length < 2 && control.value.length >= 2) {
+      return { minlength: { requiredLength: 2, actualLength: limpo.length } };
+    }
+    return null;
+  }
+
+  /** Valida preço com até 8 dígitos inteiros e até 2 casas decimais (@Digits(integer=8, fraction=2)). */
+  static preco(control: AbstractControl): ValidationErrors | null {
+    const valor = control.value;
+    if (valor === null || valor === undefined || valor === '') return null;
+    return /^\d{1,8}(\.\d{1,2})?$/.test(String(valor)) ? null : { precoFormato: true };
   }
 
   static cpf(control: AbstractControl): ValidationErrors | null {

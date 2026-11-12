@@ -17,6 +17,7 @@ export function mensagemErro(controle: AbstractControl | null): string {
   if (erros['email']) return 'E-mail inválido.';
   if (erros['min']) return `O valor mínimo é ${erros['min'].min}.`;
   if (erros['max']) return `O valor máximo é ${erros['max'].max}.`;
+  if (erros['precoFormato']) return 'Use até 8 dígitos inteiros e no máximo 2 casas decimais.';
   if (erros['pattern']) return 'Formato inválido.';
   if (erros['cpfFormato']) return 'O CPF deve ter 11 números.';
   if (erros['cpfInvalido']) return 'CPF inválido.';

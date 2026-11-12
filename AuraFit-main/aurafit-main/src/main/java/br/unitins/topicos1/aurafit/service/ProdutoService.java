@@ -18,6 +18,12 @@ public interface ProdutoService {
     PageResponse<ProdutoResponseDTO> buscar(String nome, Long idTipoProteina, Long idCategoria, Long idMarca,
             int page, int pageSize);
 
+    /**
+     * Listagem com filtros opcionais: nome, tipo de proteína, categoria, marca e status ativo.
+     */
+    PageResponse<ProdutoResponseDTO> buscar(String nome, Long idTipoProteina, Long idCategoria, Long idMarca,
+            Boolean ativo, int page, int pageSize);
+
     ProdutoResponseDTO findById(long id);
 
     ProdutoResponseDTO create(@NotNull(message = "Os dados devem ser informados.") @Valid ProdutoRequestDTO dto);

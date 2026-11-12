@@ -68,6 +68,14 @@ export class Pagamento implements OnInit {
     return [1, 2, 3, 4, 5, 6];
   }
 
+  descontoPix(): number {
+    return this.form.controls.forma.value === 'pix' ? +(this.carrinho.subtotal() * 0.05).toFixed(2) : 0;
+  }
+
+  totalFinal(): number {
+    return Math.max(0, +(this.carrinho.total() - this.descontoPix()).toFixed(2));
+  }
+
   buscarCep(): void {
     const controle = this.form.controls.cep;
     if (controle.invalid) return;
@@ -82,10 +90,11 @@ export class Pagamento implements OnInit {
           return;
         }
         this.form.patchValue({
-          logradouro: endereco.logradouro,
-          bairro: endereco.bairro,
+          logradouro: endereco.logradouro || this.form.controls.logradouro.value,
+          bairro: endereco.bairro || this.form.controls.bairro.value,
           cidade: endereco.localidade,
           uf: endereco.uf,
+          complemento: this.form.controls.complemento.value || endereco.complemento,
         });
       },
       error: () => {
@@ -102,15 +111,16 @@ export class Pagamento implements OnInit {
     }
     const numero = 'AF-' + Math.floor(10000 + Math.random() * 89999);
     const forma = this.form.controls.forma.value;
+    const totalPedido = this.totalFinal();
     this.sessao.registrarPedido({
       numero,
       data: new Date().toISOString().slice(0, 10),
-      total: this.carrinho.total(),
+      total: totalPedido,
       itens: this.carrinho.quantidadeTotal(),
       formaPagamento: forma === 'pix' ? 'Pix' : forma === 'cartao' ? 'Cartão de crédito' : 'Boleto',
       situacao: 'Aguardando pagamento',
     });
-    this.totalPago.set(this.carrinho.total());
+    this.totalPago.set(totalPedido);
     this.carrinho.limpar();
     this.pedidoConcluido.set(numero);
   }

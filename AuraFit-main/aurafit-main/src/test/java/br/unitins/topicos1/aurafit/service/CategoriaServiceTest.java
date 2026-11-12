@@ -48,6 +48,14 @@ class CategoriaServiceTest {
     }
 
     @Test
+    void deveRejeitarNomeComMenosDeDoisCaracteresUteis() {
+        var erro = assertThrows(ValidationException.class,
+                () -> service.create(new CategoriaRequestDTO(" a ", null)));
+        assertEquals("nome", erro.getFieldErrors().get(0).field);
+        assertNull(categorias.persistida);
+    }
+
+    @Test
     void naoDeveExcluirCategoriaComProdutos() {
         categorias.porId = Entidades.comId(new Categoria(), 3L);
         produtos.possuiProdutos = true;

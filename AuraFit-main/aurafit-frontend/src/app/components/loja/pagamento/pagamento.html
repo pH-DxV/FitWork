@@ -127,7 +127,10 @@
           <p>Seu carrinho está vazio.</p>
         }
         <div class="linha"><span>Frete</span><span>{{ carrinho.frete() === 0 ? 'Grátis' : (carrinho.frete() | currency: 'BRL') }}</span></div>
-        <div class="linha total"><span>Total</span><span>{{ carrinho.total() | currency: 'BRL' }}</span></div>
+        @if (descontoPix() > 0) {
+          <div class="linha"><span>Desconto Pix (5%)</span><span>- {{ descontoPix() | currency: 'BRL' }}</span></div>
+        }
+        <div class="linha total"><span>Total</span><span>{{ totalFinal() | currency: 'BRL' }}</span></div>
       </aside>
     </div>
   }

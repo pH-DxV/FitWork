@@ -76,6 +76,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     private void validarDados(CategoriaRequestDTO dto, Long id) {
+        Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 100, "O nome deve conter entre 2 e 100 caracteres.");
         if (categoriaRepository.findByNomeExceptId(dto.nome(), id) != null) {
             throw ValidationException.of("nome", "Já existe uma categoria cadastrada com esse nome.");
         }

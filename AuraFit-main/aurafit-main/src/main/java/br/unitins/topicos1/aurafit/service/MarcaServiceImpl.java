@@ -77,6 +77,7 @@ public class MarcaServiceImpl implements MarcaService {
     }
 
     private void validarDados(MarcaRequestDTO dto, Long id) {
+        Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 100, "O nome deve conter entre 2 e 100 caracteres.");
         if (marcaRepository.findByCnpjExceptId(dto.cnpj(), id) != null) {
             throw ValidationException.of("cnpj", "Já existe uma marca cadastrada com esse CNPJ.");
         }

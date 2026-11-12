@@ -64,7 +64,11 @@ export class CategoriaForm implements OnInit {
     this.salvando.set(true);
     this.erroGeral.set('');
 
-    const dados: CategoriaRequest = this.form.getRawValue();
+    const valores = this.form.getRawValue();
+    const dados: CategoriaRequest = {
+      nome: valores.nome.trim(),
+      descricao: valores.descricao.trim(),
+    };
     const requisicao: Observable<unknown> = this.id()
       ? this.categoriaService.alterar(this.id()!, dados)
       : this.categoriaService.incluir(dados);

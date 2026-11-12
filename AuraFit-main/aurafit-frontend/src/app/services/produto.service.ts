@@ -12,13 +12,14 @@ export class ProdutoService {
   private http = inject(HttpClient);
   private readonly url = `${API_URL}/produtos`;
 
-  /** Listagem paginada com filtros opcionais (nome, tipo de proteína, categoria e marca). */
+  /** Listagem paginada com filtros opcionais (nome, tipo de proteína, categoria, marca e status ativo). */
   listar(filtro: FiltroProduto = {}, page = 0, pageSize = 10): Observable<Pagina<Produto>> {
     let params = paginacao(page, pageSize);
     if (filtro.nome?.trim()) params = params.set('nome', filtro.nome.trim());
     if (filtro.idTipoProteina) params = params.set('idTipoProteina', filtro.idTipoProteina);
     if (filtro.idCategoria) params = params.set('idCategoria', filtro.idCategoria);
     if (filtro.idMarca) params = params.set('idMarca', filtro.idMarca);
+    if (filtro.ativo !== undefined && filtro.ativo !== null) params = params.set('ativo', filtro.ativo);
     return this.http.get<Pagina<Produto>>(this.url, { params });
   }
 

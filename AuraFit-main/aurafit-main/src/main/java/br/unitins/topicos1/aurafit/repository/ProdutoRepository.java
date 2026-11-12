@@ -20,6 +20,14 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
      * Busca com filtros opcionais (os nulos são ignorados).
      */
     public PanacheQuery<Produto> buscar(String nome, TipoProteina tipoProteina, Long idCategoria, Long idMarca) {
+        return buscar(nome, tipoProteina, idCategoria, idMarca, null);
+    }
+
+    /**
+     * Busca com filtros opcionais, incluindo status de ativação (os nulos são ignorados).
+     */
+    public PanacheQuery<Produto> buscar(String nome, TipoProteina tipoProteina, Long idCategoria, Long idMarca,
+            Boolean ativo) {
         StringBuilder consulta = new StringBuilder("1 = 1");
         Map<String, Object> parametros = new HashMap<>();
 
@@ -38,6 +46,10 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
         if (idMarca != null) {
             consulta.append(" and marca.id = :idMarca");
             parametros.put("idMarca", idMarca);
+        }
+        if (ativo != null) {
+            consulta.append(" and ativo = :ativo");
+            parametros.put("ativo", ativo);
         }
         consulta.append(" order by nome");
 

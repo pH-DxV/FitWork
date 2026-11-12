@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,10 +16,18 @@ import { SessaoService } from '../../../services/sessao.service';
 })
 export class LojaLayout {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   carrinho = inject(CarrinhoService);
   sessao = inject(SessaoService);
 
+  termoBusca = signal('');
   ano = new Date().getFullYear();
+
+  constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.termoBusca.set(params.get('busca') ?? '');
+    });
+  }
 
   pesquisar(termo: string): void {
     this.router.navigate(['/loja'], { queryParams: { busca: termo.trim() || null } });

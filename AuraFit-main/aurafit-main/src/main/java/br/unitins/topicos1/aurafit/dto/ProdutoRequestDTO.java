@@ -10,11 +10,13 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 public record ProdutoRequestDTO(
     @NotBlank(message = "O nome do produto deve ser informado.")
     @Length(min = 2, max = 120, message = "O nome deve conter entre 2 e 120 caracteres.")
+    @Pattern(regexp = "^\\s*\\S.{0,118}\\S\\s*$", message = "O nome deve conter entre 2 e 120 caracteres.")
     String nome,
 
     @Length(max = 1000, message = "A descrição deve conter no máximo 1000 caracteres.")

@@ -98,6 +98,11 @@ class ProdutoServiceTest {
             public Sabor findById(Long id) {
                 return sabores.get(id);
             }
+
+            @Override
+            public java.util.List<Sabor> findByIds(java.util.Collection<Long> ids) {
+                return ids.stream().map(sabores::get).filter(java.util.Objects::nonNull).toList();
+            }
         };
     }
 
@@ -135,6 +140,32 @@ class ProdutoServiceTest {
                 () -> service.create(dto(1L, 99L, Set.of()))).getFieldErrors().get(0).field);
         assertEquals("idsSabores", assertThrows(ValidationException.class,
                 () -> service.create(dto(1L, 1L, Set.of(42L)))).getFieldErrors().get(0).field);
+    }
+
+    @Test
+    void deveRejeitarCategoriaMarcaEFornecedorInexistentes() {
+        var semCategoria = new ProdutoRequestDTO("Whey 900g", null, new BigDecimal("199.90"), 900, 10,
+                1L, true, 99L, 1L, 1L, Set.of());
+        assertEquals("idCategoria", assertThrows(ValidationException.class,
+                () -> service.create(semCategoria)).getFieldErrors().get(0).field);
+
+        var semMarca = new ProdutoRequestDTO("Whey 900g", null, new BigDecimal("199.90"), 900, 10,
+                1L, true, 1L, 99L, 1L, Set.of());
+        assertEquals("idMarca", assertThrows(ValidationException.class,
+                () -> service.create(semMarca)).getFieldErrors().get(0).field);
+
+        var semFornecedor = new ProdutoRequestDTO("Whey 900g", null, new BigDecimal("199.90"), 900, 10,
+                1L, true, 1L, 1L, 99L, Set.of());
+        assertEquals("idFornecedor", assertThrows(ValidationException.class,
+                () -> service.create(semFornecedor)).getFieldErrors().get(0).field);
+    }
+
+    @Test
+    void deveRejeitarNomeComApenasUmCaractereAposTrim() {
+        var nomeCurto = new ProdutoRequestDTO(" a ", null, new BigDecimal("199.90"), 900, 10,
+                1L, true, 1L, 1L, 1L, Set.of());
+        assertEquals("nome", assertThrows(ValidationException.class,
+                () -> service.create(nomeCurto)).getFieldErrors().get(0).field);
     }
 
     @Test

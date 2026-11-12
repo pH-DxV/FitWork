@@ -167,8 +167,8 @@ export class ClienteForm implements OnInit {
         }
 
         this.endereco.patchValue({
-          logradouro: resposta.logradouro,
-          bairro: resposta.bairro,
+          logradouro: resposta.logradouro || this.endereco.controls.logradouro.value,
+          bairro: resposta.bairro || this.endereco.controls.bairro.value,
           cidade: resposta.localidade,
           uf: resposta.uf,
           codigoIbge: resposta.ibge,

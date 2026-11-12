@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 public class Produto extends DefaultEntity {
@@ -52,6 +53,7 @@ public class Produto extends DefaultEntity {
     @JoinTable(name = "produto_sabor",
             joinColumns = @JoinColumn(name = "id_produto"),
             inverseJoinColumns = @JoinColumn(name = "id_sabor"))
+    @BatchSize(size = 25)
     private Set<Sabor> sabores = new HashSet<>();
 
     public String getNome() {

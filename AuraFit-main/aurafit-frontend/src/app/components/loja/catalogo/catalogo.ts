@@ -71,6 +71,7 @@ export class Catalogo implements OnInit {
       nome: this.busca(),
       idTipoProteina: this.tipoSelecionado(),
       idCategoria: this.categoriaSelecionada(),
+      ativo: true,
     };
     this.produtoService.listar(filtro, this.pageIndex(), this.pageSize()).subscribe({
       next: (pagina) => {

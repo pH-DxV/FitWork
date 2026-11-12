@@ -76,6 +76,7 @@ public class SaborServiceImpl implements SaborService {
     }
 
     private void validarDados(SaborRequestDTO dto, Long id) {
+        Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 80, "O nome deve conter entre 2 e 80 caracteres.");
         if (saborRepository.findByNomeExceptId(dto.nome(), id) != null) {
             throw ValidationException.of("nome", "Já existe um sabor cadastrado com esse nome.");
         }

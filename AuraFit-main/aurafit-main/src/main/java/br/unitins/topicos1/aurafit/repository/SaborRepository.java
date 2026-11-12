@@ -1,5 +1,9 @@
 package br.unitins.topicos1.aurafit.repository;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import br.unitins.topicos1.aurafit.model.Sabor;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
@@ -17,6 +21,13 @@ public class SaborRepository implements PanacheRepository<Sabor> {
             return find("lower(nome) = lower(?1)", nome.trim()).firstResult();
         }
         return find("lower(nome) = lower(?1) and id <> ?2", nome.trim(), id).firstResult();
+    }
+
+    public List<Sabor> findByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return list("id in ?1", ids);
     }
 
     @Override

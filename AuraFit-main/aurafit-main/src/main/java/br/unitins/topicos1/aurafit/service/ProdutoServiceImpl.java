@@ -60,6 +60,13 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Transactional
     public PageResponse<ProdutoResponseDTO> buscar(String nome, Long idTipoProteina, Long idCategoria, Long idMarca,
             int page, int pageSize) {
+        return buscar(nome, idTipoProteina, idCategoria, idMarca, null, page, pageSize);
+    }
+
+    @Override
+    @Transactional
+    public PageResponse<ProdutoResponseDTO> buscar(String nome, Long idTipoProteina, Long idCategoria, Long idMarca,
+            Boolean ativo, int page, int pageSize) {
         TipoProteina tipo = null;
         if (idTipoProteina != null) {
             tipo = TipoProteina.valueOf(idTipoProteina);
@@ -68,7 +75,7 @@ public class ProdutoServiceImpl implements ProdutoService {
             }
         }
         TipoProteina filtroTipo = tipo;
-        return paginar(() -> produtoRepository.buscar(nome, filtroTipo, idCategoria, idMarca), page, pageSize);
+        return paginar(() -> produtoRepository.buscar(nome, filtroTipo, idCategoria, idMarca, ativo), page, pageSize);
     }
 
     @Override
@@ -108,6 +115,8 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     private void aplicarDados(Produto produto, ProdutoRequestDTO dto) {
+        Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 120, "O nome deve conter entre 2 e 120 caracteres.");
+
         Marca marca = buscarMarca(dto.idMarca());
         boolean trocouDeMarca = produto.getMarca() == null || !produto.getMarca().getId().equals(marca.getId());
         if (trocouDeMarca && !marca.isAtiva()) {
@@ -161,15 +170,29 @@ public class ProdutoServiceImpl implements ProdutoService {
 
     private Set<Sabor> buscarSabores(Set<Long> ids) {
         Set<Sabor> sabores = new HashSet<>();
-        if (ids == null) {
+        if (ids == null || ids.isEmpty()) {
             return sabores;
         }
         for (Long id : ids) {
-            Sabor sabor = id == null ? null : saborRepository.findById(id);
-            if (sabor == null) {
-                throw ValidationException.of("idsSabores", "Sabor não encontrado: " + id + ".");
+            if (id == null) {
+                throw ValidationException.of("idsSabores", "Sabor não encontrado: null.");
             }
-            sabores.add(sabor);
+        }
+        for (Sabor sabor : saborRepository.findByIds(ids)) {
+            if (sabor != null) {
+                sabores.add(sabor);
+            }
+        }
+        if (sabores.size() != ids.size()) {
+            Set<Long> encontrados = new HashSet<>();
+            for (Sabor s : sabores) {
+                encontrados.add(s.getId());
+            }
+            for (Long id : ids) {
+                if (!encontrados.contains(id)) {
+                    throw ValidationException.of("idsSabores", "Sabor não encontrado: " + id + ".");
+                }
+            }
         }
         return sabores;
     }

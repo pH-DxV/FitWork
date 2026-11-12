@@ -133,5 +133,15 @@ class MarcaServiceTest {
         public boolean existeComCategoria(Long idCategoria) {
             return possuiProdutos;
         }
+
+        @Override
+        public boolean existeComFornecedor(Long idFornecedor) {
+            return possuiProdutos;
+        }
+
+        @Override
+        public boolean existeComSabor(Long idSabor) {
+            return possuiProdutos;
+        }
     }
 }

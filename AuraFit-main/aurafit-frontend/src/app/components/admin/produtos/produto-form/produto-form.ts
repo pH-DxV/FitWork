@@ -44,6 +44,7 @@ export class ProdutoForm implements OnInit {
   private route = inject(ActivatedRoute);
 
   id = signal<number | null>(null);
+  marcaOriginalId = signal<number | null>(null);
   carregando = signal(false);
   salvando = signal(false);
   erroGeral = signal('');
@@ -59,7 +60,7 @@ export class ProdutoForm implements OnInit {
       Validators.required, Validators.minLength(2), Validators.maxLength(120), Validadores.naoSomenteEspacos,
     ]),
     descricao: this.fb.nonNullable.control('', Validators.maxLength(1000)),
-    preco: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    preco: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01), Validadores.preco]),
     pesoGramas: this.fb.control<number | null>(null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]),
     estoque: this.fb.control<number | null>(null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]),
     idTipoProteina: this.fb.control<number | null>(null, Validators.required),
@@ -97,6 +98,7 @@ export class ProdutoForm implements OnInit {
     this.carregando.set(true);
     this.produtoService.buscarPorId(this.id()!).subscribe({
       next: (produto) => {
+        this.marcaOriginalId.set(produto.marca.id);
         this.form.patchValue({
           nome: produto.nome,
           descricao: produto.descricao ?? '',

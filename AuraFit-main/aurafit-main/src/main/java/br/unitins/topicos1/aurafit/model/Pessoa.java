@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import org.hibernate.annotations.BatchSize;
 
 /**
  * Dados comuns de qualquer pessoa física do sistema.
@@ -17,6 +18,7 @@ import jakarta.persistence.OneToOne;
  * seguindo o mesmo modelo do projeto da disciplina.
  */
 @Entity
+@BatchSize(size = 25)
 public class Pessoa extends DefaultEntity {
 
     @Column(length = 120, nullable = false)
@@ -35,6 +37,7 @@ public class Pessoa extends DefaultEntity {
     private String genero;
 
     @OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 25)
     private List<Telefone> telefones = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

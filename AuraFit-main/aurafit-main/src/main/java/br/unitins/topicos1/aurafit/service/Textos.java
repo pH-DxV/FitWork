@@ -14,4 +14,13 @@ public final class Textos {
     public static String somenteDigitos(String texto) {
         return texto == null ? null : texto.replaceAll("\\D", "");
     }
+
+    /** Valida se o texto após trim() respeita o intervalo [min, max]. */
+    public static void validarTamanhoUtil(String texto, String campo, int min, int max, String mensagem) {
+        String limpo = limparOuNulo(texto);
+        int tamanho = limpo == null ? 0 : limpo.length();
+        if (tamanho < min || tamanho > max) {
+            throw br.unitins.topicos1.aurafit.exception.ValidationException.of(campo, mensagem);
+        }
+    }
 }

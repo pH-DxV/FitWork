@@ -31,7 +31,8 @@ export class CarrinhoService {
       this.alterarQuantidade(existente, existente.quantidade + quantidade);
       return;
     }
-    this.atualizar([...this.itens(), { produto, sabor, quantidade }]);
+    const limite = Math.max(produto.estoque, 1);
+    this.atualizar([...this.itens(), { produto, sabor, quantidade: Math.min(quantidade, limite) }]);
   }
 
   alterarQuantidade(item: ItemCarrinho, quantidade: number): void {

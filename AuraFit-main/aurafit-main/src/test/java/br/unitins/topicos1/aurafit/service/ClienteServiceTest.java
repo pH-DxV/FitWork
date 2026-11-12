@@ -38,14 +38,20 @@ class ClienteServiceTest {
 
     private Cliente persistido;
     private Cliente existente;
+    private Cliente excluido;
+    private Pessoa pessoaExcluida;
     private Pessoa pessoaComMesmoCpf;
+    private Pessoa pessoaComMesmoEmail;
     private Municipio municipioCriado;
 
     @BeforeEach
     void preparar() {
         persistido = null;
         existente = null;
+        excluido = null;
+        pessoaExcluida = null;
         pessoaComMesmoCpf = null;
+        pessoaComMesmoEmail = null;
         municipioCriado = null;
 
         tocantins.setNome("Tocantins");
@@ -55,10 +61,17 @@ class ClienteServiceTest {
         palmas.setCodigoIbge("1721000");
         palmas.setEstado(tocantins);
 
+        Estado goias = Entidades.comId(new Estado(), 9L);
+        goias.setNome("Goiás");
+        goias.setSigla("GO");
+        goias.setRegiao(Regiao.CENTRO_OESTE);
+
         municipioService.estadoRepository = new EstadoRepository() {
             @Override
             public Estado findBySigla(String sigla) {
-                return "TO".equalsIgnoreCase(sigla) ? tocantins : null;
+                if ("TO".equalsIgnoreCase(sigla)) return tocantins;
+                if ("GO".equalsIgnoreCase(sigla)) return goias;
+                return null;
             }
         };
         municipioService.municipioRepository = new MunicipioRepository() {
@@ -89,6 +102,17 @@ class ClienteServiceTest {
             public Cliente findById(Long id) {
                 return existente;
             }
+
+            @Override
+            public Cliente findByCpf(String cpf) {
+                return existente != null && existente.getPessoa() != null
+                        && cpf.equals(existente.getPessoa().getCpf()) ? existente : null;
+            }
+
+            @Override
+            public void delete(Cliente cliente) {
+                excluido = cliente;
+            }
         };
         service.pessoaRepository = new PessoaRepository() {
             @Override
@@ -98,7 +122,12 @@ class ClienteServiceTest {
 
             @Override
             public Pessoa findByEmailExceptId(String email, Long idPessoa) {
-                return null;
+                return pessoaComMesmoEmail;
+            }
+
+            @Override
+            public void delete(Pessoa pessoa) {
+                pessoaExcluida = pessoa;
             }
         };
     }
@@ -143,6 +172,14 @@ class ClienteServiceTest {
     }
 
     @Test
+    void deveRejeitarEmailDuplicado() {
+        pessoaComMesmoEmail = new Pessoa();
+        var erro = assertThrows(ValidationException.class,
+                () -> service.create(dto(LocalDate.of(1995, 5, 10), "1721000", "Palmas")));
+        assertEquals("email", erro.getFieldErrors().get(0).field);
+    }
+
+    @Test
     void deveRejeitarUfInexistente() {
         var dto = new ClienteRequestDTO("Ana", "ana@aurafit.com", "52998224725", LocalDate.of(1995, 5, 10), null,
                 List.of(new TelefoneRequestDTO("63", "999991111", true)),
@@ -150,6 +187,30 @@ class ClienteServiceTest {
                 false, true);
         var erro = assertThrows(ValidationException.class, () -> service.create(dto));
         assertEquals("endereco.uf", erro.getFieldErrors().get(0).field);
+    }
+
+    @Test
+    void deveRejeitarUfDivergenteDoMunicipioEncontradoPorIbge() {
+        var dto = new ClienteRequestDTO("Ana", "ana@aurafit.com", "52998224725", LocalDate.of(1995, 5, 10), null,
+                List.of(new TelefoneRequestDTO("63", "999991111", true)),
+                new EnderecoRequestDTO("77001002", "Rua A", "1", null, "Centro", "Palmas", "GO", "1721000"),
+                false, true);
+        var erro = assertThrows(ValidationException.class, () -> service.create(dto));
+        assertEquals("endereco.uf", erro.getFieldErrors().get(0).field);
+    }
+
+    @Test
+    void deveBuscarPorCpfFormatadoEExcluirClienteComPessoa() {
+        service.create(dto(LocalDate.of(1995, 5, 10), "1721000", "Palmas"));
+        existente = Entidades.comId(persistido, 10L);
+        Entidades.comId(existente.getPessoa(), 20L);
+
+        var encontrado = service.findByCpf("529.982.247-25");
+        assertEquals(10L, encontrado.id());
+
+        service.delete(10L);
+        assertSame(existente, excluido);
+        assertSame(existente.getPessoa(), pessoaExcluida);
     }
 
     @Test

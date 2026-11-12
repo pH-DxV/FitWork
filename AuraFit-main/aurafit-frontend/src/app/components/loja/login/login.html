@@ -10,7 +10,7 @@
   </div>
 
   <form class="cartao formulario-login" [formGroup]="form" (ngSubmit)="entrar()">
-    <h2>Entrar</h2>
+    <h2>{{ modoCadastro() ? 'Criar conta' : 'Entrar' }}</h2>
 
     <mat-form-field appearance="outline">
       <mat-label>E-mail</mat-label>
@@ -32,9 +32,16 @@
 
     <button mat-button type="button" class="esqueci">Esqueci minha senha</button>
 
-    <button mat-flat-button type="submit" class="entrar">Entrar</button>
+    <button mat-flat-button type="submit" class="entrar">
+      {{ modoCadastro() ? 'Criar conta e continuar' : 'Entrar' }}
+    </button>
 
-    <p class="cadastro">Ainda não tem conta? <a routerLink="/loja/perfil">Criar conta</a></p>
+    <p class="cadastro">
+      {{ modoCadastro() ? 'Já possui uma conta?' : 'Ainda não tem conta?' }}
+      <a href="" (click)="$event.preventDefault(); alternarModo()">
+        {{ modoCadastro() ? 'Entrar' : 'Criar conta' }}
+      </a>
+    </p>
     <p class="aviso-prototipo">
       <mat-icon>info</mat-icon>
       Protótipo: a autenticação real (Usuário + JWT) será implementada na próxima etapa.

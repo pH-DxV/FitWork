@@ -64,7 +64,11 @@ export class SaborForm implements OnInit {
     this.salvando.set(true);
     this.erroGeral.set('');
 
-    const dados: SaborRequest = this.form.getRawValue();
+    const valores = this.form.getRawValue();
+    const dados: SaborRequest = {
+      nome: valores.nome.trim(),
+      descricao: valores.descricao.trim(),
+    };
     const requisicao: Observable<unknown> = this.id()
       ? this.saborService.alterar(this.id()!, dados)
       : this.saborService.incluir(dados);

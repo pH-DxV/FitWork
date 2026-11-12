@@ -28,16 +28,17 @@ public class ProdutoResource {
 
     /**
      * Listagem paginada com filtros opcionais.
-     * Ex.: GET /produtos?nome=whey&idTipoProteina=2&idCategoria=1&idMarca=3&page=0&pageSize=10
+     * Ex.: GET /produtos?nome=whey&idTipoProteina=2&idCategoria=1&idMarca=3&ativo=true&page=0&pageSize=10
      */
     @GET
     public PageResponse<ProdutoResponseDTO> buscarTodos(@QueryParam("nome") String nome,
             @QueryParam("idTipoProteina") Long idTipoProteina,
             @QueryParam("idCategoria") Long idCategoria,
             @QueryParam("idMarca") Long idMarca,
+            @QueryParam("ativo") Boolean ativo,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        return service.buscar(nome, idTipoProteina, idCategoria, idMarca, page, pageSize);
+        return service.buscar(nome, idTipoProteina, idCategoria, idMarca, ativo, page, pageSize);
     }
 
     @GET
