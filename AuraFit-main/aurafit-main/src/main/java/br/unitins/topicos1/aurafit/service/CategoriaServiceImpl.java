@@ -1,6 +1,5 @@
 package br.unitins.topicos1.aurafit.service;
 
-import java.util.function.Supplier;
 import br.unitins.topicos1.aurafit.dto.CategoriaRequestDTO;
 import br.unitins.topicos1.aurafit.dto.CategoriaResponseDTO;
 import br.unitins.topicos1.aurafit.dto.PageResponse;
@@ -10,7 +9,6 @@ import br.unitins.topicos1.aurafit.mapper.CategoriaMapper;
 import br.unitins.topicos1.aurafit.model.Categoria;
 import br.unitins.topicos1.aurafit.repository.CategoriaRepository;
 import br.unitins.topicos1.aurafit.repository.ProdutoRepository;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -26,12 +24,13 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     public PageResponse<CategoriaResponseDTO> findAll(int page, int pageSize) {
-        return paginar(() -> categoriaRepository.findAll(), page, pageSize);
+        return Paginacao.executar(() -> categoriaRepository.findAll(), page, pageSize, CategoriaMapper::toResponse);
     }
 
     @Override
     public PageResponse<CategoriaResponseDTO> findByNome(String nome, int page, int pageSize) {
-        return paginar(() -> categoriaRepository.findByNome(nome), page, pageSize);
+        return Paginacao.executar(() -> categoriaRepository.findByNome(nome), page, pageSize,
+                CategoriaMapper::toResponse);
     }
 
     @Override
@@ -63,22 +62,16 @@ public class CategoriaServiceImpl implements CategoriaService {
     public void delete(long id) {
         Categoria categoria = buscarCategoriaOuFalhar(id);
         if (produtoRepository.existeComCategoria(id)) {
-            throw ValidationException.of("id", "Esta categoria possui produtos cadastrados e não pode ser excluída.");
+            throw ValidationException.conflict("id",
+                    "Esta categoria possui produtos cadastrados e não pode ser excluída.");
         }
         categoriaRepository.delete(categoria);
-    }
-
-    private PageResponse<CategoriaResponseDTO> paginar(Supplier<PanacheQuery<Categoria>> consulta, int page, int pageSize) {
-        Paginacao.validar(page, pageSize);
-        PanacheQuery<Categoria> query = consulta.get();
-        return PageResponse.of(query.page(page, pageSize).list(), page, pageSize, query.count(),
-                CategoriaMapper::toResponse);
     }
 
     private void validarDados(CategoriaRequestDTO dto, Long id) {
         Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 100, "O nome deve conter entre 2 e 100 caracteres.");
         if (categoriaRepository.findByNomeExceptId(dto.nome(), id) != null) {
-            throw ValidationException.of("nome", "Já existe uma categoria cadastrada com esse nome.");
+            throw ValidationException.conflict("nome", "Já existe uma categoria cadastrada com esse nome.");
         }
     }
 

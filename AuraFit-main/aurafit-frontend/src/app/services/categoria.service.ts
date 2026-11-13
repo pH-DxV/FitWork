@@ -4,19 +4,25 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api.config';
 import { Categoria, CategoriaRequest } from '../models/categoria.model';
 import { Pagina } from '../models/pagina.model';
-import { paginacao } from './http-params';
+import { paginacao, carregarTodasPaginas } from './http-params';
 
 @Injectable({ providedIn: 'root' })
 export class CategoriaService {
   private http = inject(HttpClient);
   private readonly url = `${API_URL}/categorias`;
 
-  /** Lista paginada; quando o filtro é informado usa o endpoint /categorias/nome/{nome}. */
+  /** Lista paginada com filtro opcional via query parameter (?nome=). */
   listar(filtro = '', page = 0, pageSize = 10): Observable<Pagina<Categoria>> {
-    const params = paginacao(page, pageSize);
+    let params = paginacao(page, pageSize);
     const termo = filtro.trim();
-    const url = termo ? `${this.url}/nome/${encodeURIComponent(termo)}` : this.url;
-    return this.http.get<Pagina<Categoria>>(url, { params });
+    if (termo) {
+      params = params.set('nome', termo);
+    }
+    return this.http.get<Pagina<Categoria>>(this.url, { params });
+  }
+
+  listarTodos(): Observable<Categoria[]> {
+    return carregarTodasPaginas((page, pageSize) => this.listar('', page, pageSize));
   }
 
   buscarPorId(id: number): Observable<Categoria> {

@@ -76,17 +76,17 @@ export class ProdutoForm implements OnInit {
   ngOnInit(): void {
     forkJoin({
       tipos: this.produtoService.listarTiposProteina(),
-      categorias: this.categoriaService.listar('', 0, 100),
-      marcas: this.marcaService.listar('', 0, 100),
-      fornecedores: this.fornecedorService.listar('', 0, 100),
-      sabores: this.saborService.listar('', 0, 100),
+      categorias: this.categoriaService.listarTodos(),
+      marcas: this.marcaService.listarTodos(),
+      fornecedores: this.fornecedorService.listarTodos(),
+      sabores: this.saborService.listarTodos(),
     }).subscribe({
       next: (r) => {
         this.tipos.set(r.tipos);
-        this.categorias.set(r.categorias.items);
-        this.marcas.set(r.marcas.items);
-        this.fornecedores.set(r.fornecedores.items);
-        this.sabores.set(r.sabores.items);
+        this.categorias.set(r.categorias);
+        this.marcas.set(r.marcas);
+        this.fornecedores.set(r.fornecedores);
+        this.sabores.set(r.sabores);
       },
       error: () => this.erroGeral.set('Não foi possível carregar as opções do formulário. O back-end está rodando?'),
     });

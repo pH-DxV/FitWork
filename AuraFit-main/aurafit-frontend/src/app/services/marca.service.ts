@@ -4,19 +4,25 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api.config';
 import { Marca, MarcaRequest } from '../models/marca.model';
 import { Pagina } from '../models/pagina.model';
-import { paginacao } from './http-params';
+import { paginacao, carregarTodasPaginas } from './http-params';
 
 @Injectable({ providedIn: 'root' })
 export class MarcaService {
   private http = inject(HttpClient);
   private readonly url = `${API_URL}/marcas`;
 
-  /** Lista paginada; quando o filtro é informado usa o endpoint /marcas/nome/{nome}. */
+  /** Lista paginada com filtro opcional via query parameter (?nome=). */
   listar(filtro = '', page = 0, pageSize = 10): Observable<Pagina<Marca>> {
-    const params = paginacao(page, pageSize);
+    let params = paginacao(page, pageSize);
     const termo = filtro.trim();
-    const url = termo ? `${this.url}/nome/${encodeURIComponent(termo)}` : this.url;
-    return this.http.get<Pagina<Marca>>(url, { params });
+    if (termo) {
+      params = params.set('nome', termo);
+    }
+    return this.http.get<Pagina<Marca>>(this.url, { params });
+  }
+
+  listarTodos(): Observable<Marca[]> {
+    return carregarTodasPaginas((page, pageSize) => this.listar('', page, pageSize));
   }
 
   buscarPorId(id: number): Observable<Marca> {

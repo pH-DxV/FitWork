@@ -13,7 +13,8 @@ public class ClienteRepository implements PanacheRepository<Cliente> {
     }
 
     public PanacheQuery<Cliente> findByNome(String nome) {
-        return find("lower(pessoa.nome) like lower(?1) order by pessoa.nome", "%" + nome.trim() + "%");
+        String termo = nome == null ? "" : nome.trim();
+        return find("lower(pessoa.nome) like lower(?1) order by pessoa.nome", "%" + termo + "%");
     }
 
     @Override

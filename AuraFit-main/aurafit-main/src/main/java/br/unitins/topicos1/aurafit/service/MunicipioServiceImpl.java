@@ -1,6 +1,5 @@
 package br.unitins.topicos1.aurafit.service;
 
-import java.util.function.Supplier;
 import br.unitins.topicos1.aurafit.dto.MunicipioResponseDTO;
 import br.unitins.topicos1.aurafit.dto.PageResponse;
 import br.unitins.topicos1.aurafit.exception.ResourceNotFoundException;
@@ -10,7 +9,6 @@ import br.unitins.topicos1.aurafit.model.Estado;
 import br.unitins.topicos1.aurafit.model.Municipio;
 import br.unitins.topicos1.aurafit.repository.EstadoRepository;
 import br.unitins.topicos1.aurafit.repository.MunicipioRepository;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -26,12 +24,13 @@ public class MunicipioServiceImpl implements MunicipioService {
 
     @Override
     public PageResponse<MunicipioResponseDTO> findAll(int page, int pageSize) {
-        return paginar(() -> municipioRepository.findAll(), page, pageSize);
+        return Paginacao.executar(() -> municipioRepository.findAll(), page, pageSize, MunicipioMapper::toResponse);
     }
 
     @Override
     public PageResponse<MunicipioResponseDTO> findByNome(String nome, int page, int pageSize) {
-        return paginar(() -> municipioRepository.findByNome(nome), page, pageSize);
+        return Paginacao.executar(() -> municipioRepository.findByNome(nome), page, pageSize,
+                MunicipioMapper::toResponse);
     }
 
     @Override
@@ -75,12 +74,5 @@ public class MunicipioServiceImpl implements MunicipioService {
         municipio.setEstado(estado);
         municipioRepository.persist(municipio);
         return municipio;
-    }
-
-    private PageResponse<MunicipioResponseDTO> paginar(Supplier<PanacheQuery<Municipio>> consulta, int page, int pageSize) {
-        Paginacao.validar(page, pageSize);
-        PanacheQuery<Municipio> query = consulta.get();
-        return PageResponse.of(query.page(page, pageSize).list(), page, pageSize, query.count(),
-                MunicipioMapper::toResponse);
     }
 }

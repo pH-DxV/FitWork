@@ -1,6 +1,5 @@
 package br.unitins.topicos1.aurafit.service;
 
-import java.util.function.Supplier;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import br.unitins.topicos1.aurafit.model.Endereco;
 import br.unitins.topicos1.aurafit.model.Pessoa;
 import br.unitins.topicos1.aurafit.repository.ClienteRepository;
 import br.unitins.topicos1.aurafit.repository.PessoaRepository;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -40,13 +38,13 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public PageResponse<ClienteResponseDTO> findAll(int page, int pageSize) {
-        return paginar(() -> clienteRepository.findAll(), page, pageSize);
+        return Paginacao.executar(() -> clienteRepository.findAll(), page, pageSize, ClienteMapper::toResponse);
     }
 
     @Override
     @Transactional
     public PageResponse<ClienteResponseDTO> findByNome(String nome, int page, int pageSize) {
-        return paginar(() -> clienteRepository.findByNome(nome), page, pageSize);
+        return Paginacao.executar(() -> clienteRepository.findByNome(nome), page, pageSize, ClienteMapper::toResponse);
     }
 
     @Override
@@ -105,13 +103,6 @@ public class ClienteServiceImpl implements ClienteService {
         return false;
     }
 
-    private PageResponse<ClienteResponseDTO> paginar(Supplier<PanacheQuery<Cliente>> consulta, int page, int pageSize) {
-        Paginacao.validar(page, pageSize);
-        PanacheQuery<Cliente> query = consulta.get();
-        return PageResponse.of(query.page(page, pageSize).list(), page, pageSize, query.count(),
-                ClienteMapper::toResponse);
-    }
-
     private void validarDados(ClienteRequestDTO dto, Long idPessoa) {
         Textos.validarTamanhoUtil(dto.nome(), "nome", 2, 120, "O nome deve conter entre 2 e 120 caracteres.");
         if (Period.between(dto.dataNascimento(), LocalDate.now()).getYears() < IDADE_MINIMA) {
@@ -119,10 +110,10 @@ public class ClienteServiceImpl implements ClienteService {
                     "O cliente deve ter pelo menos " + IDADE_MINIMA + " anos.");
         }
         if (pessoaRepository.findByCpfExceptId(dto.cpf(), idPessoa) != null) {
-            throw ValidationException.of("cpf", "Já existe uma pessoa cadastrada com esse CPF.");
+            throw ValidationException.conflict("cpf", "Já existe uma pessoa cadastrada com esse CPF.");
         }
         if (pessoaRepository.findByEmailExceptId(dto.email(), idPessoa) != null) {
-            throw ValidationException.of("email", "Já existe uma pessoa cadastrada com esse e-mail.");
+            throw ValidationException.conflict("email", "Já existe uma pessoa cadastrada com esse e-mail.");
         }
     }
 

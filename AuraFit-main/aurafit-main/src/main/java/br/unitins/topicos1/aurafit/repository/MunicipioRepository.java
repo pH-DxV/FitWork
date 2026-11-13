@@ -9,7 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class MunicipioRepository implements PanacheRepository<Municipio> {
 
     public PanacheQuery<Municipio> findByNome(String nome) {
-        return find("lower(nome) like lower(?1) order by nome", "%" + nome.trim() + "%");
+        String termo = nome == null ? "" : nome.trim();
+        return find("lower(nome) like lower(?1) order by nome", "%" + termo + "%");
     }
 
     public Municipio findByCodigoIbge(String codigoIbge) {

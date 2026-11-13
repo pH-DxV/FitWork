@@ -26,22 +26,25 @@ export class CarrinhoService {
   total = computed(() => this.subtotal() + this.frete());
 
   adicionar(produto: Produto, sabor: string | null, quantidade = 1): void {
+    if (produto.estoque <= 0 || quantidade <= 0) {
+      return;
+    }
     const existente = this.itens().find((i) => i.produto.id === produto.id && i.sabor === sabor);
     if (existente) {
       this.alterarQuantidade(existente, existente.quantidade + quantidade);
       return;
     }
-    const limite = Math.max(produto.estoque, 1);
-    this.atualizar([...this.itens(), { produto, sabor, quantidade: Math.min(quantidade, limite) }]);
+    this.atualizar([...this.itens(), { produto, sabor, quantidade: Math.min(quantidade, produto.estoque) }]);
   }
 
   alterarQuantidade(item: ItemCarrinho, quantidade: number): void {
-    if (quantidade <= 0) {
+    if (quantidade <= 0 || item.produto.estoque <= 0) {
       this.remover(item);
       return;
     }
-    const limite = Math.max(item.produto.estoque, 1);
-    this.atualizar(this.itens().map((i) => (i === item ? { ...i, quantidade: Math.min(quantidade, limite) } : i)));
+    this.atualizar(
+      this.itens().map((i) => (i === item ? { ...i, quantidade: Math.min(quantidade, item.produto.estoque) } : i)),
+    );
   }
 
   remover(item: ItemCarrinho): void {

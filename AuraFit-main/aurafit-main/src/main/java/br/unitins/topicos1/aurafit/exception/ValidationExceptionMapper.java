@@ -21,7 +21,15 @@ public class ValidationExceptionMapper implements ExceptionMapper<ValidationExce
 
     @Override
     public Response toResponse(ValidationException e) {
-        return ProblemFactory.build(baseUrl, "validation-error", "Erro de validação", Response.Status.BAD_REQUEST,
-                e.getMessage(), uri, e.getFieldErrors());
+        Response.Status status = e.getStatus();
+        boolean conflito = status == Response.Status.CONFLICT;
+        return ProblemFactory.build(
+                baseUrl,
+                conflito ? "conflict" : "validation-error",
+                conflito ? "Conflito de dados" : "Erro de validação",
+                status,
+                e.getMessage(),
+                uri,
+                e.getFieldErrors());
     }
 }

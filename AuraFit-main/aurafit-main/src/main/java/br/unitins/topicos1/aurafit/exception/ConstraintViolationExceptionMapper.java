@@ -47,8 +47,13 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
      */
     private String caminhoDoCampo(Path path) {
         StringBuilder caminho = new StringBuilder();
+        String ultimoParametro = null;
         for (Path.Node node : path) {
             ElementKind kind = node.getKind();
+            if (kind == ElementKind.PARAMETER && node.getName() != null) {
+                ultimoParametro = node.getName();
+                continue;
+            }
             if (kind != ElementKind.PROPERTY && kind != ElementKind.CONTAINER_ELEMENT) {
                 continue;
             }
@@ -59,6 +64,9 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
                 caminho.append(caminho.isEmpty() ? "" : ".").append(node.getName());
             }
         }
-        return caminho.isEmpty() ? "unknown" : caminho.toString();
+        if (!caminho.isEmpty()) {
+            return caminho.toString();
+        }
+        return (ultimoParametro != null && !ultimoParametro.startsWith("arg")) ? ultimoParametro : "body";
     }
 }

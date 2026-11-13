@@ -9,7 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class FornecedorRepository implements PanacheRepository<Fornecedor> {
 
     public PanacheQuery<Fornecedor> findByNome(String razaoSocial) {
-        return find("lower(razaoSocial) like lower(?1) order by razaoSocial", "%" + razaoSocial.trim() + "%");
+        String termo = razaoSocial == null ? "" : razaoSocial.trim();
+        return find("lower(razaoSocial) like lower(?1) order by razaoSocial", "%" + termo + "%");
     }
 
     public Fornecedor findByCnpjExceptId(String cnpj, Long id) {

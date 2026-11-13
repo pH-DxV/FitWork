@@ -11,12 +11,14 @@ export class ClienteService {
   private http = inject(HttpClient);
   private readonly url = `${API_URL}/clientes`;
 
-  /** Lista paginada; quando o filtro é informado usa o endpoint /clientes/nome/{nome}. */
+  /** Lista paginada com filtro opcional via query parameter (?nome=). */
   listar(filtro = '', page = 0, pageSize = 10): Observable<Pagina<Cliente>> {
-    const params = paginacao(page, pageSize);
+    let params = paginacao(page, pageSize);
     const termo = filtro.trim();
-    const url = termo ? `${this.url}/nome/${encodeURIComponent(termo)}` : this.url;
-    return this.http.get<Pagina<Cliente>>(url, { params });
+    if (termo) {
+      params = params.set('nome', termo);
+    }
+    return this.http.get<Pagina<Cliente>>(this.url, { params });
   }
 
   buscarPorId(id: number): Observable<Cliente> {

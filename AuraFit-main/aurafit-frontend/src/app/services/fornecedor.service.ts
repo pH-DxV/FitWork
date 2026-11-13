@@ -4,19 +4,25 @@ import { Observable } from 'rxjs';
 import { API_URL } from '../api.config';
 import { Fornecedor, FornecedorRequest } from '../models/fornecedor.model';
 import { Pagina } from '../models/pagina.model';
-import { paginacao } from './http-params';
+import { paginacao, carregarTodasPaginas } from './http-params';
 
 @Injectable({ providedIn: 'root' })
 export class FornecedorService {
   private http = inject(HttpClient);
   private readonly url = `${API_URL}/fornecedores`;
 
-  /** Lista paginada; quando o filtro é informado usa o endpoint /fornecedores/nome/{nome}. */
+  /** Lista paginada com filtro opcional via query parameter (?nome=). */
   listar(filtro = '', page = 0, pageSize = 10): Observable<Pagina<Fornecedor>> {
-    const params = paginacao(page, pageSize);
+    let params = paginacao(page, pageSize);
     const termo = filtro.trim();
-    const url = termo ? `${this.url}/nome/${encodeURIComponent(termo)}` : this.url;
-    return this.http.get<Pagina<Fornecedor>>(url, { params });
+    if (termo) {
+      params = params.set('nome', termo);
+    }
+    return this.http.get<Pagina<Fornecedor>>(this.url, { params });
+  }
+
+  listarTodos(): Observable<Fornecedor[]> {
+    return carregarTodasPaginas((page, pageSize) => this.listar('', page, pageSize));
   }
 
   buscarPorId(id: number): Observable<Fornecedor> {

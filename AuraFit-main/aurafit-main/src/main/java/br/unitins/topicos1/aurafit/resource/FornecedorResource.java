@@ -5,6 +5,9 @@ import br.unitins.topicos1.aurafit.dto.FornecedorResponseDTO;
 import br.unitins.topicos1.aurafit.dto.PageResponse;
 import br.unitins.topicos1.aurafit.service.FornecedorService;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
@@ -15,8 +18,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 @Path("fornecedores")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,11 +32,16 @@ public class FornecedorResource {
     FornecedorService service;
 
     @GET
-    public PageResponse<FornecedorResponseDTO> buscarTodos(@QueryParam("page") @DefaultValue("0") int page,
+    public PageResponse<FornecedorResponseDTO> buscarTodos(@QueryParam("nome") String nome,
+            @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
+        if (nome != null && !nome.isBlank()) {
+            return service.findByNome(nome, page, pageSize);
+        }
         return service.findAll(page, pageSize);
     }
 
+    @Deprecated
     @GET
     @Path("/nome/{nome}")
     public PageResponse<FornecedorResponseDTO> buscarPorNome(@PathParam("nome") String nome,
@@ -42,24 +52,33 @@ public class FornecedorResource {
 
     @GET
     @Path("/{id}")
-    public FornecedorResponseDTO buscarPorId(@PathParam("id") Long id) {
+    public FornecedorResponseDTO buscarPorId(
+            @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         return service.findById(id);
     }
 
     @POST
-    public Response incluir(FornecedorRequestDTO dto) {
-        return Response.status(Response.Status.CREATED).entity(service.create(dto)).build();
+    public Response incluir(
+            @NotNull(message = "Os dados devem ser informados.") @Valid FornecedorRequestDTO dto,
+            @Context UriInfo uriInfo) {
+        FornecedorResponseDTO criado = service.create(dto);
+        return Response.created(uriInfo.getAbsolutePathBuilder().path(String.valueOf(criado.id())).build())
+                .entity(criado)
+                .build();
     }
 
     @PUT
     @Path("/{id}")
-    public FornecedorResponseDTO alterar(@PathParam("id") Long id, FornecedorRequestDTO dto) {
+    public FornecedorResponseDTO alterar(
+            @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
+            @NotNull(message = "Os dados devem ser informados.") @Valid FornecedorRequestDTO dto) {
         return service.update(id, dto);
     }
 
     @DELETE
     @Path("/{id}")
-    public Response apagar(@PathParam("id") Long id) {
+    public Response apagar(
+            @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         service.delete(id);
         return Response.noContent().build();
     }

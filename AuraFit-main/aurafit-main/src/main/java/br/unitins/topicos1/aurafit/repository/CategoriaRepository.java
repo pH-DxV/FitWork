@@ -9,7 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class CategoriaRepository implements PanacheRepository<Categoria> {
 
     public PanacheQuery<Categoria> findByNome(String nome) {
-        return find("lower(nome) like lower(?1) order by nome", "%" + nome.trim() + "%");
+        String termo = nome == null ? "" : nome.trim();
+        return find("lower(nome) like lower(?1) order by nome", "%" + termo + "%");
     }
 
     public Categoria findByNomeExceptId(String nome, Long id) {

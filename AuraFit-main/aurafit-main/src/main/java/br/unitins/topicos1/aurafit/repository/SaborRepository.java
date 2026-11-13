@@ -13,7 +13,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class SaborRepository implements PanacheRepository<Sabor> {
 
     public PanacheQuery<Sabor> findByNome(String nome) {
-        return find("lower(nome) like lower(?1) order by nome", "%" + nome.trim() + "%");
+        String termo = nome == null ? "" : nome.trim();
+        return find("lower(nome) like lower(?1) order by nome", "%" + termo + "%");
     }
 
     public Sabor findByNomeExceptId(String nome, Long id) {

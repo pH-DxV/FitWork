@@ -30,7 +30,7 @@
       <mat-error>{{ mensagemErro('senha') }}</mat-error>
     </mat-form-field>
 
-    <button mat-button type="button" class="esqueci">Esqueci minha senha</button>
+    <button mat-button type="button" class="esqueci" (click)="esqueciSenha()">Esqueci minha senha</button>
 
     <button mat-flat-button type="submit" class="entrar">
       {{ modoCadastro() ? 'Criar conta e continuar' : 'Entrar' }}

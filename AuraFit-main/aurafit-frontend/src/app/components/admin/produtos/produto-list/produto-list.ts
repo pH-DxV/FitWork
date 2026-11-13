@@ -61,8 +61,8 @@ export class ProdutoList implements OnInit {
 
   ngOnInit(): void {
     this.produtoService.listarTiposProteina().subscribe((lista) => this.tipos.set(lista));
-    this.categoriaService.listar('', 0, 100).subscribe((pagina) => this.categorias.set(pagina.items));
-    this.marcaService.listar('', 0, 100).subscribe((pagina) => this.marcas.set(pagina.items));
+    this.categoriaService.listarTodos().subscribe((lista) => this.categorias.set(lista));
+    this.marcaService.listarTodos().subscribe((lista) => this.marcas.set(lista));
     this.carregar();
   }
 

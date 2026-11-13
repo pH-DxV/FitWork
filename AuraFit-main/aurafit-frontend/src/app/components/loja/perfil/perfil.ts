@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { SessaoService } from '../../../services/sessao.service';
+import { NotificacaoService } from '../../../shared/notificacao.service';
 
 /** Protótipo da tela de perfil do usuário da loja. */
 @Component({
@@ -15,6 +16,7 @@ import { SessaoService } from '../../../services/sessao.service';
 })
 export class Perfil {
   sessao = inject(SessaoService);
+  private notificacao = inject(NotificacaoService);
   private router = inject(Router);
 
   iniciais(nome: string): string {
@@ -24,6 +26,10 @@ export class Perfil {
       .slice(0, 2)
       .map((parte) => parte[0].toUpperCase())
       .join('');
+  }
+
+  funcionalidadePrototipo(acao: string): void {
+    this.notificacao.sucesso(`${acao} estará disponível após integração com JWT.`);
   }
 
   sair(): void {

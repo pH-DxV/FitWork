@@ -1,13 +1,11 @@
 package br.unitins.topicos1.aurafit.service;
 
-import java.util.function.Supplier;
 import br.unitins.topicos1.aurafit.dto.EstadoResponseDTO;
 import br.unitins.topicos1.aurafit.dto.PageResponse;
 import br.unitins.topicos1.aurafit.exception.ResourceNotFoundException;
 import br.unitins.topicos1.aurafit.mapper.EstadoMapper;
 import br.unitins.topicos1.aurafit.model.Estado;
 import br.unitins.topicos1.aurafit.repository.EstadoRepository;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -19,12 +17,12 @@ public class EstadoServiceImpl implements EstadoService {
 
     @Override
     public PageResponse<EstadoResponseDTO> findAll(int page, int pageSize) {
-        return paginar(() -> estadoRepository.findAll(), page, pageSize);
+        return Paginacao.executar(() -> estadoRepository.findAll(), page, pageSize, EstadoMapper::toResponse);
     }
 
     @Override
     public PageResponse<EstadoResponseDTO> findByNome(String nome, int page, int pageSize) {
-        return paginar(() -> estadoRepository.findByNome(nome), page, pageSize);
+        return Paginacao.executar(() -> estadoRepository.findByNome(nome), page, pageSize, EstadoMapper::toResponse);
     }
 
     @Override
@@ -43,12 +41,5 @@ public class EstadoServiceImpl implements EstadoService {
             throw new ResourceNotFoundException("Estado não encontrado.");
         }
         return EstadoMapper.toResponse(estado);
-    }
-
-    private PageResponse<EstadoResponseDTO> paginar(Supplier<PanacheQuery<Estado>> consulta, int page, int pageSize) {
-        Paginacao.validar(page, pageSize);
-        PanacheQuery<Estado> query = consulta.get();
-        return PageResponse.of(query.page(page, pageSize).list(), page, pageSize, query.count(),
-                EstadoMapper::toResponse);
     }
 }

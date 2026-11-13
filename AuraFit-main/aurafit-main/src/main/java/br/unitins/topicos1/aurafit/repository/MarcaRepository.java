@@ -9,7 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class MarcaRepository implements PanacheRepository<Marca> {
 
     public PanacheQuery<Marca> findByNome(String nome) {
-        return find("lower(nome) like lower(?1) order by nome", "%" + nome.trim() + "%");
+        String termo = nome == null ? "" : nome.trim();
+        return find("lower(nome) like lower(?1) order by nome", "%" + termo + "%");
     }
 
     public Marca findByCnpjExceptId(String cnpj, Long id) {

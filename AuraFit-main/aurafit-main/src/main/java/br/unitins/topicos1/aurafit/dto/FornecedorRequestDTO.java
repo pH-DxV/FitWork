@@ -10,7 +10,6 @@ import jakarta.validation.constraints.Pattern;
 public record FornecedorRequestDTO(
     @NotBlank(message = "A razão social deve ser informada.")
     @Length(min = 2, max = 120, message = "A razão social deve conter entre 2 e 120 caracteres.")
-    @Pattern(regexp = "^\\s*\\S.{0,118}\\S\\s*$", message = "A razão social deve conter entre 2 e 120 caracteres.")
     String razaoSocial,
 
     @NotBlank(message = "O CNPJ deve ser informado.")

@@ -1,6 +1,5 @@
 package br.unitins.topicos1.aurafit.service;
 
-import java.util.function.Supplier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +20,6 @@ import br.unitins.topicos1.aurafit.repository.FornecedorRepository;
 import br.unitins.topicos1.aurafit.repository.MarcaRepository;
 import br.unitins.topicos1.aurafit.repository.ProdutoRepository;
 import br.unitins.topicos1.aurafit.repository.SaborRepository;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -47,13 +45,14 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Override
     @Transactional
     public PageResponse<ProdutoResponseDTO> findAll(int page, int pageSize) {
-        return paginar(() -> produtoRepository.findAll(), page, pageSize);
+        return Paginacao.executar(() -> produtoRepository.findAll(), page, pageSize, ProdutoMapper::toResponse);
     }
 
     @Override
     @Transactional
     public PageResponse<ProdutoResponseDTO> findByNome(String nome, int page, int pageSize) {
-        return paginar(() -> produtoRepository.findByNome(nome), page, pageSize);
+        return Paginacao.executar(() -> produtoRepository.findByNome(nome), page, pageSize,
+                ProdutoMapper::toResponse);
     }
 
     @Override
@@ -75,7 +74,8 @@ public class ProdutoServiceImpl implements ProdutoService {
             }
         }
         TipoProteina filtroTipo = tipo;
-        return paginar(() -> produtoRepository.buscar(nome, filtroTipo, idCategoria, idMarca, ativo), page, pageSize);
+        return Paginacao.executar(() -> produtoRepository.buscar(nome, filtroTipo, idCategoria, idMarca, ativo),
+                page, pageSize, ProdutoMapper::toResponse);
     }
 
     @Override
@@ -105,13 +105,6 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Transactional
     public void delete(long id) {
         produtoRepository.delete(buscarProdutoOuFalhar(id));
-    }
-
-    private PageResponse<ProdutoResponseDTO> paginar(Supplier<PanacheQuery<Produto>> consulta, int page, int pageSize) {
-        Paginacao.validar(page, pageSize);
-        PanacheQuery<Produto> query = consulta.get();
-        return PageResponse.of(query.page(page, pageSize).list(), page, pageSize, query.count(),
-                ProdutoMapper::toResponse);
     }
 
     private void aplicarDados(Produto produto, ProdutoRequestDTO dto) {

@@ -4,6 +4,7 @@ import br.unitins.topicos1.aurafit.dto.EstadoResponseDTO;
 import br.unitins.topicos1.aurafit.dto.PageResponse;
 import br.unitins.topicos1.aurafit.service.EstadoService;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -20,11 +21,16 @@ public class EstadoResource {
     EstadoService service;
 
     @GET
-    public PageResponse<EstadoResponseDTO> buscarTodos(@QueryParam("page") @DefaultValue("0") int page,
+    public PageResponse<EstadoResponseDTO> buscarTodos(@QueryParam("nome") String nome,
+            @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("30") int pageSize) {
+        if (nome != null && !nome.isBlank()) {
+            return service.findByNome(nome, page, pageSize);
+        }
         return service.findAll(page, pageSize);
     }
 
+    @Deprecated
     @GET
     @Path("/nome/{nome}")
     public PageResponse<EstadoResponseDTO> buscarPorNome(@PathParam("nome") String nome,
@@ -35,7 +41,8 @@ public class EstadoResource {
 
     @GET
     @Path("/{id}")
-    public EstadoResponseDTO buscarPorId(@PathParam("id") Long id) {
+    public EstadoResponseDTO buscarPorId(
+            @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         return service.findById(id);
     }
 

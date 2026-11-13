@@ -17,7 +17,6 @@ import jakarta.validation.constraints.Pattern;
 public record ClienteRequestDTO(
     @NotBlank(message = "O nome deve ser informado.")
     @Length(min = 2, max = 120, message = "O nome deve conter entre 2 e 120 caracteres.")
-    @Pattern(regexp = "^\\s*\\S.{0,118}\\S\\s*$", message = "O nome deve conter entre 2 e 120 caracteres.")
     String nome,
 
     @NotBlank(message = "O e-mail deve ser informado.")

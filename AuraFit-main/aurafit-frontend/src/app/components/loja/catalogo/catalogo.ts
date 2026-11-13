@@ -61,7 +61,7 @@ export class Catalogo implements OnInit {
 
   ngOnInit(): void {
     this.produtoService.listarTiposProteina().subscribe((lista) => this.tipos.set(lista));
-    this.categoriaService.listar('', 0, 100).subscribe((pagina) => this.categorias.set(pagina.items));
+    this.categoriaService.listarTodos().subscribe((lista) => this.categorias.set(lista));
   }
 
   carregar(): void {
