@@ -1,120 +1,311 @@
-<section class="pagina estreita">
-  <a mat-button routerLink="/admin/produtos" class="voltar">
-    <mat-icon>arrow_back</mat-icon>
-    Voltar para produtos
-  </a>
+<div class="flex flex-col gap-space-lg">
+  <!-- BREADCRUMB & TOPO DO FORMULÁRIO (Tela 07 do Stitch) -->
+  <div class="flex flex-col gap-space-xs">
+    <nav class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+      <a routerLink="/admin/produtos" class="text-primary-container hover:underline flex items-center gap-1 font-semibold">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>Voltar para Produtos</span>
+      </a>
+      <span>/</span>
+      <span>{{ id() ? 'Edição de SKU #' + id() : 'Novo Cadastro de SKU' }}</span>
+    </nav>
 
-  <header class="topo-pagina">
-    <h1>{{ id() ? 'Editar produto' : 'Novo produto' }}</h1>
-  </header>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1">
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
+            {{ id() ? 'Editar Produto' : 'Novo Produto' }}
+          </h1>
+          <span
+            class="px-3 py-0.5 rounded-full font-label-sm text-label-sm font-bold"
+            [class]="
+              form.controls.ativo.value
+                ? 'bg-[#dcfce7] text-[#14532d]'
+                : 'bg-surface-container-high text-on-surface-variant'
+            "
+          >
+            {{ form.controls.ativo.value ? 'Disponível na Vitrine' : 'SKU Inativo' }}
+          </span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Preencha os atributos comerciais, classificação nutricional e vínculos de marca, categoria, fornecedor e sabores.
+        </p>
+      </div>
+    </div>
+  </div>
 
   @if (erroGeral()) {
-    <p class="mensagem-erro">{{ erroGeral() }}</p>
+    <div class="p-4 rounded-xl bg-error-container text-on-error-container font-title-sm text-title-sm flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px]">error</span>
+      <span>{{ erroGeral() }}</span>
+    </div>
   }
 
-  @if (carregando()) {
-    <p>Carregando...</p>
-  } @else {
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
-      <h2>Informações do produto</h2>
+  <!-- LAYOUT 2 COLUNAS DO STITCH (8 cols Formulário / 4 cols Prévia em Tempo Real) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <!-- COLUNA ESQUERDA (8 cols): Formulário Reativo -->
+    <form
+      [formGroup]="form"
+      (ngSubmit)="salvar()"
+      novalidate
+      class="lg:col-span-8 flex flex-col gap-space-lg"
+    >
+      <!-- CARD 1: IDENTIFICAÇÃO E COMERCIAL -->
+      <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#dcfce7] text-[#15803d] font-title-sm font-bold flex items-center justify-center">
+              1
+            </span>
+            <div>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                Identificação &amp; Dados Comerciais
+              </h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Nome técnico, descrição comercial, precificação e saldo físico inicial
+              </p>
+            </div>
+          </div>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">
+            {{ form.controls.nome.value.length }}/120 caracteres
+          </span>
+        </div>
 
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Nome</mat-label>
-        <input matInput formControlName="nome" placeholder="Ex.: Whey Protein Isolado 900g" />
-        <mat-error>{{ mensagemErro('nome') }}</mat-error>
-      </mat-form-field>
+        <div class="formulario">
+          <mat-form-field appearance="outline" class="c4">
+            <mat-label>Nome do produto</mat-label>
+            <input matInput formControlName="nome" maxlength="120" placeholder="Ex.: 100% Pure Whey Isolate Microfiltrado CFM" />
+            <mat-error>{{ mensagemErro('nome') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Descrição (opcional)</mat-label>
-        <textarea matInput formControlName="descricao" rows="3"></textarea>
-        <mat-error>{{ mensagemErro('descricao') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c4">
+            <mat-label>Descrição técnica e benefícios</mat-label>
+            <textarea matInput rows="3" formControlName="descricao" maxlength="1000"></textarea>
+            <mat-hint align="end">{{ form.controls.descricao.value.length }}/1000</mat-hint>
+            <mat-error>{{ mensagemErro('descricao') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Preço</mat-label>
-        <span matTextPrefix>R$&nbsp;</span>
-        <input matInput type="number" formControlName="preco" min="0.01" step="0.01" />
-        <mat-error>{{ mensagemErro('preco') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c2">
+            <mat-label>Preço (R$)</mat-label>
+            <input matInput type="number" step="0.01" min="0.01" formControlName="preco" />
+            <mat-error>{{ mensagemErro('preco') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c1">
-        <mat-label>Peso</mat-label>
-        <input matInput type="number" formControlName="pesoGramas" min="1" step="1" />
-        <span matTextSuffix>g</span>
-        <mat-error>{{ mensagemErro('pesoGramas') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c1">
+            <mat-label>Peso (gramas)</mat-label>
+            <input matInput type="number" step="1" min="1" formControlName="pesoGramas" />
+            <mat-error>{{ mensagemErro('pesoGramas') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c1">
-        <mat-label>Estoque</mat-label>
-        <input matInput type="number" formControlName="estoque" min="0" step="1" />
-        <mat-error>{{ mensagemErro('estoque') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c1">
+            <mat-label>Estoque</mat-label>
+            <input matInput type="number" step="1" min="0" formControlName="estoque" />
+            <mat-error>{{ mensagemErro('estoque') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
 
-      <h2>Classificação</h2>
+      <!-- CARD 2: CLASSIFICAÇÃO NUTRICIONAL E VÍNCULOS UML -->
+      <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center gap-2.5 pb-space-sm border-b border-outline-variant/20">
+          <span class="w-7 h-7 rounded-lg bg-[#dcfce7] text-[#15803d] font-title-sm font-bold flex items-center justify-center">
+            2
+          </span>
+          <div>
+            <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+              Classificação Nutricional, Fornecedor &amp; Sabores
+            </h2>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">
+              Relacionamentos ManyToOne (Marca, Categoria, Fornecedor) e ManyToMany (Sabores)
+            </p>
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Tipo de proteína</mat-label>
-        <mat-select formControlName="idTipoProteina">
-          @for (tipo of tipos(); track tipo.id) {
-            <mat-option [value]="tipo.id">{{ tipo.nome }}</mat-option>
-          }
-        </mat-select>
-        <mat-error>{{ mensagemErro('idTipoProteina') }}</mat-error>
-      </mat-form-field>
+        <div class="formulario">
+          <mat-form-field appearance="outline" class="c2">
+            <mat-label>Tipo de proteína</mat-label>
+            <mat-select formControlName="idTipoProteina">
+              @for (tipo of tipos(); track tipo.id) {
+                <mat-option [value]="tipo.id">{{ tipo.nome }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ mensagemErro('idTipoProteina') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Categoria</mat-label>
-        <mat-select formControlName="idCategoria">
-          @for (categoria of categorias(); track categoria.id) {
-            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
-          }
-        </mat-select>
-        <mat-error>{{ mensagemErro('idCategoria') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c2">
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="idCategoria">
+              @for (categoria of categorias(); track categoria.id) {
+                <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ mensagemErro('idCategoria') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Marca</mat-label>
-        <mat-select formControlName="idMarca">
-          @for (marca of marcas(); track marca.id) {
-            <mat-option [value]="marca.id" [disabled]="!marca.ativa && marcaOriginalId() !== marca.id">
-              {{ marca.nome }}{{ marca.ativa ? '' : ' (inativa)' }}
-            </mat-option>
-          }
-        </mat-select>
-        <mat-error>{{ mensagemErro('idMarca') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c2">
+            <mat-label>Marca</mat-label>
+            <mat-select formControlName="idMarca">
+              @for (marca of marcas(); track marca.id) {
+                <mat-option [value]="marca.id" [disabled]="!marca.ativa && marca.id !== marcaOriginalId()">
+                  {{ marca.nome }}{{ marca.ativa ? '' : ' (inativa)' }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ mensagemErro('idMarca') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Fornecedor</mat-label>
-        <mat-select formControlName="idFornecedor">
-          @for (fornecedor of fornecedores(); track fornecedor.id) {
-            <mat-option [value]="fornecedor.id">{{ fornecedor.razaoSocial }}</mat-option>
-          }
-        </mat-select>
-        <mat-error>{{ mensagemErro('idFornecedor') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c2">
+            <mat-label>Fornecedor</mat-label>
+            <mat-select formControlName="idFornecedor">
+              @for (fornecedor of fornecedores(); track fornecedor.id) {
+                <mat-option [value]="fornecedor.id">{{ fornecedor.razaoSocial }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ mensagemErro('idFornecedor') }}</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Sabores disponíveis</mat-label>
-        <mat-select formControlName="idsSabores" multiple>
-          @for (sabor of sabores(); track sabor.id) {
-            <mat-option [value]="sabor.id">{{ sabor.nome }}</mat-option>
-          }
-        </mat-select>
-        <mat-hint>Selecione um ou mais sabores (opcional).</mat-hint>
-        <mat-error>{{ mensagemErro('idsSabores') }}</mat-error>
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="c4">
+            <mat-label>Sabores disponíveis (opcional)</mat-label>
+            <mat-select formControlName="idsSabores" multiple>
+              @for (sabor of sabores(); track sabor.id) {
+                <mat-option [value]="sabor.id">{{ sabor.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <mat-slide-toggle formControlName="ativo" class="c4">
-        Produto ativo (visível na loja)
-      </mat-slide-toggle>
+        <!-- Seletor Rápido por Chips de Sabores (Padrão Visual Stitch) -->
+        @if (sabores().length > 0) {
+          <div class="flex flex-col gap-2 pt-1">
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+              Seleção Rápida de Sabores (Clique para marcar/desmarcar):
+            </span>
+            <div class="flex flex-wrap gap-2">
+              @for (sabor of sabores(); track sabor.id) {
+                <button
+                  type="button"
+                  (click)="alternarSaborChip(sabor.id)"
+                  class="px-3 py-1.5 rounded-full font-label-md text-label-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  [class]="
+                    saborSelecionado(sabor.id)
+                      ? 'bg-[#dcfce7] text-[#14532d] border border-[#15803d]/40 font-bold shadow-xs'
+                      : 'bg-surface-container-low hover:bg-surface-container text-on-surface-variant'
+                  "
+                >
+                  @if (saborSelecionado(sabor.id)) {
+                    <span class="material-symbols-outlined text-[15px]">check</span>
+                  }
+                  <span>{{ sabor.nome }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
 
-      <div class="botoes">
-        <a mat-stroked-button routerLink="/admin/produtos">Cancelar</a>
-        <button mat-flat-button type="submit" [disabled]="salvando()">
-          {{ salvando() ? 'Salvando...' : 'Salvar' }}
-        </button>
-      </div>
+        <!-- Toggle Produto Ativo -->
+        <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/25 flex items-center justify-between mt-2">
+          <div class="flex flex-col">
+            <span class="font-title-sm text-title-sm text-on-surface font-bold">
+              Produto ativo (visível na vitrine da loja)
+            </span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">
+              Desative para ocultar temporariamente este SKU do catálogo comercial sem perder histórico.
+            </span>
+          </div>
+          <mat-slide-toggle formControlName="ativo"></mat-slide-toggle>
+        </div>
+
+        <!-- Barra de Ações -->
+        <div class="pt-4 border-t border-outline-variant/25 flex items-center justify-end gap-3">
+          <a mat-button routerLink="/admin/produtos">Cancelar</a>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="salvando() || carregando()"
+          >
+            {{ salvando() ? 'Salvando...' : 'Salvar Produto' }}
+          </button>
+        </div>
+      </section>
     </form>
-  }
-</section>
+
+    <!-- COLUNA DIREITA (4 cols): Prévia em Tempo Real do Card B2B & Compliance -->
+    <aside class="lg:col-span-4 flex flex-col gap-space-lg lg:sticky lg:top-24">
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">visibility</span>
+            <span class="font-title-sm text-title-sm text-on-surface font-bold">
+              Prévia em Tempo Real (Vitrine)
+            </span>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm">
+            Live Preview
+          </span>
+        </div>
+
+        <!-- Mini Card B2B Dinâmico -->
+        <div class="rounded-xl border border-outline-variant/30 overflow-hidden bg-surface-container-lowest shadow-xs">
+          <div class="h-36 bg-gradient-to-br from-[#e8f8ea] to-[#d7e6da] p-3 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded bg-[#121e16] text-[#95f8a7] font-label-sm text-[10px] uppercase">
+                {{ nomeTipoSelecionado() }}
+              </span>
+              <span class="px-2 py-0.5 rounded bg-white/90 text-on-surface font-label-sm text-[10px] font-bold">
+                {{ form.controls.pesoGramas.value || 900 }}g
+              </span>
+            </div>
+            <div class="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-[#95f8a7] font-headline-sm font-extrabold flex items-center justify-center shadow">
+              {{ nomeMarcaSelecionada().slice(0, 2).toUpperCase() }}
+            </div>
+            <span class="font-label-sm text-[10px] text-[#14532d] font-bold">
+              Estoque: {{ form.controls.estoque.value ?? 0 }} un
+            </span>
+          </div>
+
+          <div class="p-4 flex flex-col gap-2">
+            <div class="flex items-center justify-between font-label-sm text-[10px] uppercase text-primary font-bold">
+              <span>{{ nomeMarcaSelecionada() }}</span>
+              <span class="text-on-surface-variant">{{ nomeCategoriaSelecionada() }}</span>
+            </div>
+            <strong class="font-title-md text-title-md text-on-surface leading-snug">
+              {{ form.controls.nome.value || 'Nome do Suplemento' }}
+            </strong>
+            <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2">
+              {{ form.controls.descricao.value || 'Descrição técnica do suplemento na vitrine comercial.' }}
+            </p>
+            @if (saboresSelecionadosNomes().length > 0) {
+              <div class="flex flex-wrap gap-1 pt-1">
+                @for (nomeSabor of saboresSelecionadosNomes(); track nomeSabor) {
+                  <span class="px-2 py-0.5 rounded bg-[#dcfce7] text-[#14532d] font-label-sm text-[10px]">
+                    {{ nomeSabor }}
+                  </span>
+                }
+              </div>
+            }
+            <div class="pt-2 border-t border-outline-variant/20 flex items-baseline justify-between">
+              <span class="font-headline-sm text-headline-sm text-primary font-extrabold">
+                {{ (form.controls.preco.value || 0) | currency: 'BRL' }}
+              </span>
+              <span class="font-label-sm text-[10px] text-on-surface-variant">5% OFF no PIX</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card de Regra de Negócio Marca Inativa -->
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex items-start gap-3">
+        <span class="material-symbols-outlined text-primary text-[22px] mt-0.5">verified_user</span>
+        <div class="flex flex-col gap-1">
+          <span class="font-title-sm text-title-sm text-on-surface font-bold">
+            Validação de Marca Ativa
+          </span>
+          <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Marcas inativas ficam bloqueadas para novos cadastros de produtos, mantendo apenas o vínculo histórico caso o produto já pertença a ela.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

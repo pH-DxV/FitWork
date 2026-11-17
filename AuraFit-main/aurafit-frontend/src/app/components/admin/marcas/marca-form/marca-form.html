@@ -1,49 +1,83 @@
-<section class="pagina estreita">
-  <a mat-button routerLink="/admin/marcas" class="voltar">
-    <mat-icon>arrow_back</mat-icon>
-    Voltar para marcas
-  </a>
-
-  <header class="topo-pagina">
-    <h1>{{ id() ? 'Editar marca' : 'Nova marca' }}</h1>
-  </header>
+<div class="max-w-2xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F]">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <a routerLink="/admin/marcas" class="hover:text-[#006D2F]">Gestão de Marcas</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">{{ id() ? 'Editar Marca' : 'Nova Marca' }}</span>
+      </nav>
+      <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">
+        {{ id() ? 'Editar Marca' : 'Nova Marca Homologada' }}
+      </h1>
+    </div>
+    <a
+      routerLink="/admin/marcas"
+      class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold text-[#40493E] bg-white border border-slate-200 hover:bg-slate-50">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Voltar
+    </a>
+  </div>
 
   @if (erroGeral()) {
-    <p class="mensagem-erro">{{ erroGeral() }}</p>
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">error</span>
+      <span>{{ erroGeral() }}</span>
+    </div>
   }
 
-  @if (carregando()) {
-    <p>Carregando...</p>
-  } @else {
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Nome</mat-label>
-        <input matInput formControlName="nome" placeholder="Ex.: Growth Supplements" />
+  <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div class="p-4 border-b border-slate-100 bg-[#F8FAF8] flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-base">verified</span>
+        </div>
+        <div>
+          <h2 class="font-headline text-sm font-bold text-[#191C1B]">Dados Fiscais e Comerciais da Marca</h2>
+          <p class="text-[11px] text-[#40493E]">Validação de CNPJ e controle de status operacional</p>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="p-6 space-y-4">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Nome da marca</mat-label>
+        <input matInput formControlName="nome" maxlength="100" />
         <mat-error>{{ mensagemErro('nome') }}</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
+      <mat-form-field appearance="outline" class="w-full">
         <mat-label>CNPJ</mat-label>
-        <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" maxlength="18" (blur)="formatarCnpj()" />
+        <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" (blur)="formatarCnpj()" />
+        <mat-hint>14 dígitos</mat-hint>
         <mat-error>{{ mensagemErro('cnpj') }}</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>E-mail de contato (opcional)</mat-label>
-        <input matInput type="email" formControlName="emailContato" placeholder="contato@marca.com.br" />
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>E-mail de contato</mat-label>
+        <input matInput type="email" formControlName="emailContato" maxlength="100" />
         <mat-error>{{ mensagemErro('emailContato') }}</mat-error>
       </mat-form-field>
 
-      <mat-slide-toggle formControlName="ativa" class="c4">
-        Marca ativa (pode receber novos produtos)
-      </mat-slide-toggle>
+      <div class="p-4 rounded-xl bg-[#F8FAF8] border border-slate-200/80">
+        <mat-slide-toggle formControlName="ativa">Marca ativa para novos produtos</mat-slide-toggle>
+      </div>
 
-      <div class="botoes">
-        <a mat-stroked-button routerLink="/admin/marcas">Cancelar</a>
-        <button mat-flat-button type="submit" [disabled]="salvando()">
-          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <a
+          routerLink="/admin/marcas"
+          class="px-4 py-2.5 rounded-lg text-xs font-bold text-[#40493E] bg-slate-100 hover:bg-slate-200 transition-colors">
+          Cancelar
+        </a>
+        <button
+          type="submit"
+          [disabled]="salvando() || carregando()"
+          class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+          <span class="material-symbols-outlined text-base">save</span>
+          {{ salvando() ? 'Salvando...' : 'Salvar Marca' }}
         </button>
       </div>
     </form>
-  }
-</section>
+  </div>
+</div>

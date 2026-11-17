@@ -1,76 +1,391 @@
-<section class="pagina">
-  <header class="topo-pagina">
+<div class="space-y-6">
+  <!-- Breadcrumb & Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1>Fornecedores</h1>
-      <p class="subtitulo">Distribuidores que abastecem o estoque da loja.</p>
-    </div>
-    <a mat-flat-button routerLink="/admin/fornecedores/novo">
-      <mat-icon>add</mat-icon>
-      Novo fornecedor
-    </a>
-  </header>
-
-  <div class="cartao">
-    <mat-form-field appearance="outline" style="width: 100%">
-      <mat-label>Buscar por razão social</mat-label>
-      <input matInput #campoBusca (input)="buscar(campoBusca.value)" placeholder="Ex.: Distribuidora" />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-
-    @if (erro()) {
-      <p class="mensagem-erro">{{ erro() }}</p>
-    }
-
-    <div class="tabela-container">
-      <table mat-table [dataSource]="fornecedores()" class="tabela">
-        <ng-container matColumnDef="razaoSocial">
-          <th mat-header-cell *matHeaderCellDef>Razão social</th>
-          <td mat-cell *matCellDef="let fornecedor"><strong>{{ fornecedor.razaoSocial }}</strong></td>
-        </ng-container>
-
-        <ng-container matColumnDef="cnpj">
-          <th mat-header-cell *matHeaderCellDef>CNPJ</th>
-          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.cnpj | formato: 'cnpj' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="telefone">
-          <th mat-header-cell *matHeaderCellDef>Telefone</th>
-          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.telefone | formato: 'telefone' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>E-mail</th>
-          <td mat-cell *matCellDef="let fornecedor">{{ fornecedor.email ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let fornecedor" class="acoes">
-            <a mat-icon-button [routerLink]="['/admin/fornecedores/editar', fornecedor.id]" aria-label="Editar">
-              <mat-icon>edit</mat-icon>
-            </a>
-            <button mat-icon-button (click)="excluir(fornecedor)" aria-label="Excluir">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
-            {{ carregando() ? 'Carregando...' : 'Nenhum fornecedor encontrado.' }}
-          </td>
-        </tr>
-      </table>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F] transition-colors">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">Gestão de Fornecedores</span>
+      </nav>
+      <div class="flex items-center gap-3">
+        <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">Gestão de Fornecedores</h1>
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#2E7D32]/10 text-[#006D2F]">
+          {{ totalItems() }} Distribuidores Homologados
+        </span>
+      </div>
+      <p class="text-xs text-[#40493E] mt-0.5">
+        Controle de parceiros logísticos, validação fiscal de CNPJ e canais de abastecimento de suplementos.
+      </p>
     </div>
 
-    <mat-paginator
-      [length]="totalItems()"
-      [pageIndex]="pageIndex()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="mudarPagina($event)"
-    />
+    <div class="flex items-center gap-2.5">
+      <button
+        type="button"
+        (click)="limparFormulario()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-[#191C1B] bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-xs">
+        <span class="material-symbols-outlined text-base">restart_alt</span>
+        Limpar Formulário
+      </button>
+      <a
+        routerLink="/admin/fornecedores/novo"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        Novo Fornecedor
+      </a>
+    </div>
   </div>
-</section>
+
+  <!-- 4 Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Fornecedores Ativos</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ totalItems() }}</p>
+        <p class="text-[11px] text-[#006D2F] font-semibold mt-0.5">100% homologados para compra</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#2E7D32]/10 text-[#006D2F] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">local_shipping</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">SKUs Abastecidos</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ produtos().length }} Produtos</p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">Relacionamento N:1 com Produto</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#00695C]/10 text-[#00695C] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">inventory_2</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Canais de Contato</p>
+        <p class="font-headline text-lg font-extrabold text-[#191C1B] mt-1">Telefone + E-mail</p>
+        <p class="text-[11px] text-[#006D2F] font-semibold mt-0.5">DDD + 10/11 dígitos validados</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">support_agent</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Conformidade Fiscal</p>
+        <p class="font-headline text-lg font-extrabold text-[#191C1B] mt-1">CNPJ Único</p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">14 dígitos sem duplicidade</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">verified_user</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Split Layout (8 cols Table / 4 cols Side Form) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Suppliers Data Table (8 columns) -->
+    <div class="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <!-- Table Filter Bar -->
+      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F8FAF8]/60">
+        <div class="relative flex-1 max-w-md">
+          <span class="material-symbols-outlined text-slate-400 text-lg absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input
+            type="text"
+            [value]="filtro()"
+            (input)="buscar($any($event.target).value)"
+            placeholder="Buscar fornecedor por razão social, CNPJ, telefone ou e-mail..."
+            class="w-full pl-9 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15 text-[#191C1B] font-medium" />
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-[#40493E] font-medium">Exibindo:</span>
+          <span class="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-xs font-bold text-[#191C1B]">
+            Todos ({{ totalItems() }})
+          </span>
+        </div>
+      </div>
+
+      @if (erro()) {
+        <div class="m-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">error</span>
+          <span>{{ erro() }}</span>
+        </div>
+      }
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-[#40493E] uppercase tracking-wider">
+              <th class="py-3.5 px-4">ID / CNPJ</th>
+              <th class="py-3.5 px-4">Razão Social</th>
+              <th class="py-3.5 px-4">Contato (Telefone & E-mail)</th>
+              <th class="py-3.5 px-4 text-center">Produtos</th>
+              <th class="py-3.5 px-4 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            @for (fornecedor of fornecedores(); track fornecedor.id) {
+              <tr
+                class="hover:bg-slate-50/90 transition-colors cursor-pointer"
+                [class.bg-[#2E7D32]/5]="editandoId() === fornecedor.id"
+                (click)="selecionarParaEdicao(fornecedor)">
+                <td class="py-3.5 px-4">
+                  <span class="font-mono font-bold text-[#191C1B] block">#FOR-{{ fornecedor.id.toString().padStart(3, '0') }}</span>
+                  <span class="font-mono text-[11px] text-[#40493E]">{{ fornecedor.cnpj | formato: 'cnpj' }}</span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-[#2E7D32]/10 text-[#006D2F] font-headline font-extrabold text-xs flex items-center justify-center shrink-0 border border-[#2E7D32]/20">
+                      {{ iniciaisFornecedor(fornecedor.razaoSocial) }}
+                    </div>
+                    <div>
+                      <a
+                        [routerLink]="['/admin/fornecedores/detalhes', fornecedor.id]"
+                        (click)="$event.stopPropagation()"
+                        class="font-bold text-[#191C1B] hover:text-[#006D2F] text-sm transition-colors">
+                        {{ fornecedor.razaoSocial }}
+                      </a>
+                      <p class="text-[11px] text-[#40493E]">Distribuidor Homologado · Operação Nacional</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="space-y-0.5">
+                    <p class="font-semibold text-[#191C1B] flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-sm text-[#006D2F]">call</span>
+                      {{ fornecedor.telefone | formato: 'telefone' }}
+                    </p>
+                    <p class="text-[11px] text-[#40493E] flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-xs text-slate-400">mail</span>
+                      {{ fornecedor.email || 'Sem e-mail cadastrado' }}
+                    </p>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-[#191C1B]">
+                    {{ qtdProdutos(fornecedor.id) }} SKUs
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right" (click)="$event.stopPropagation()">
+                  <div class="inline-flex items-center justify-end gap-1">
+                    <a
+                      [routerLink]="['/admin/fornecedores/detalhes', fornecedor.id]"
+                      class="p-1.5 rounded-lg text-[#00695C] hover:bg-[#00695C]/10 transition-colors"
+                      title="Ver Ficha Completa do Fornecedor">
+                      <span class="material-symbols-outlined text-base">visibility</span>
+                    </a>
+                    <button
+                      type="button"
+                      (click)="selecionarParaEdicao(fornecedor)"
+                      class="p-1.5 rounded-lg text-[#006D2F] hover:bg-[#2E7D32]/10 transition-colors"
+                      title="Editar no painel lateral">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                    </button>
+                    <a
+                      [routerLink]="['/admin/fornecedores/editar', fornecedor.id]"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-[#191C1B] hover:bg-slate-100 transition-colors"
+                      title="Abrir tela dedicada de edição">
+                      <span class="material-symbols-outlined text-base">open_in_new</span>
+                    </a>
+                    <button
+                      type="button"
+                      (click)="excluir(fornecedor)"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-[#BA1A1A] hover:bg-red-50 transition-colors"
+                      title="Excluir Fornecedor">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="py-10 text-center text-xs text-[#40493E]">
+                  {{ carregando() ? 'Carregando fornecedores...' : 'Nenhum fornecedor encontrado.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="px-4 py-2 border-t border-slate-100 bg-[#F8FAF8]/60">
+        <mat-paginator
+          [length]="totalItems()"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[5, 10, 25]"
+          (page)="mudarPagina($event)"
+          showFirstLastButtons />
+      </div>
+    </div>
+
+    <!-- Right Column: Quick Create / Edit Form + Supply Share (4 columns) -->
+    <div class="lg:col-span-4 space-y-5">
+      <!-- Form Card -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-100 bg-[#F8FAF8] flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center">
+              <span class="material-symbols-outlined text-base">{{ editandoId() ? 'edit_square' : 'local_shipping' }}</span>
+            </div>
+            <div>
+              <h2 class="font-headline text-sm font-bold text-[#191C1B]">
+                {{ editandoId() ? 'Editar Fornecedor' : 'Novo Fornecedor' }}
+              </h2>
+              <p class="text-[11px] text-[#40493E]">
+                {{ editandoId() ? 'Editando registro #FOR-' + editandoId()!.toString().padStart(3, '0') : 'Preencha os dados da entidade Fornecedor' }}
+              </p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2E7D32]/10 text-[#006D2F] uppercase">
+            {{ editandoId() ? 'Modo Edição' : 'Novo Registro' }}
+          </span>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="salvarInline()" class="p-5 space-y-4">
+          @if (erroFormulario()) {
+            <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">error</span>
+              <span>{{ erroFormulario() }}</span>
+            </div>
+          }
+
+          <!-- Razão Social -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">Razão Social <span class="text-[#BA1A1A]">*</span></label>
+              <span class="text-[10px] font-medium text-[#40493E]">2 a 120 caracteres</span>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined text-slate-400 text-base absolute left-3 top-1/2 -translate-y-1/2">domain</span>
+              <input
+                type="text"
+                formControlName="razaoSocial"
+                maxlength="120"
+                placeholder="Ex: Suplementos Brasil Distribuidora Ltda"
+                class="w-full pl-9 pr-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15" />
+            </div>
+            @if (form.controls.razaoSocial.touched && form.controls.razaoSocial.invalid) {
+              <p class="text-[11px] text-[#BA1A1A] font-medium mt-1">{{ mensagemErro('razaoSocial') }}</p>
+            } @else {
+              <p class="text-[11px] text-[#40493E] mt-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-[#006D2F]">check_circle</span>
+                Razão social oficial registrada na Receita Federal.
+              </p>
+            }
+          </div>
+
+          <!-- CNPJ -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">CNPJ do Fornecedor <span class="text-[#BA1A1A]">*</span></label>
+              <span class="text-[10px] font-mono font-semibold text-[#00695C]">14 dígitos numéricos</span>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined text-slate-400 text-base absolute left-3 top-1/2 -translate-y-1/2">badge</span>
+              <input
+                type="text"
+                formControlName="cnpj"
+                (blur)="formatarCnpjInput()"
+                placeholder="00.000.000/0001-00"
+                class="w-full pl-9 pr-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15" />
+            </div>
+            @if (form.controls.cnpj.touched && form.controls.cnpj.invalid) {
+              <p class="text-[11px] text-[#BA1A1A] font-medium mt-1">{{ mensagemErro('cnpj') }}</p>
+            } @else {
+              <p class="text-[11px] text-[#40493E] mt-1">
+                Unicidade garantida (`cnpj` único no sistema).
+              </p>
+            }
+          </div>
+
+          <!-- Telefone -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">Telefone Comercial <span class="text-[#BA1A1A]">*</span></label>
+              <span class="text-[10px] font-mono font-semibold text-[#40493E]">10 ou 11 dígitos (DDD + Número)</span>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined text-slate-400 text-base absolute left-3 top-1/2 -translate-y-1/2">call</span>
+              <input
+                type="tel"
+                formControlName="telefone"
+                (blur)="formatarTelefoneInput()"
+                placeholder="(11) 98888-7777"
+                class="w-full pl-9 pr-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15" />
+            </div>
+            @if (form.controls.telefone.touched && form.controls.telefone.invalid) {
+              <p class="text-[11px] text-[#BA1A1A] font-medium mt-1">{{ mensagemErro('telefone') }}</p>
+            } @else {
+              <p class="text-[11px] text-[#40493E] mt-1">
+                Aceita telefone fixo (10 dígitos) ou celular/WhatsApp (11 dígitos).
+              </p>
+            }
+          </div>
+
+          <!-- E-mail -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">E-mail Comercial</label>
+              <span class="text-[10px] font-medium text-[#40493E]">Opcional</span>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined text-slate-400 text-base absolute left-3 top-1/2 -translate-y-1/2">alternate_email</span>
+              <input
+                type="email"
+                formControlName="email"
+                maxlength="100"
+                placeholder="comercial@fornecedor.com.br"
+                class="w-full pl-9 pr-3 py-2 text-xs font-medium text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15" />
+            </div>
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <p class="text-[11px] text-[#BA1A1A] font-medium mt-1">{{ mensagemErro('email') }}</p>
+            }
+          </div>
+
+          <!-- Form Action Buttons -->
+          <div class="pt-2 flex items-center gap-2">
+            <button
+              type="submit"
+              [disabled]="salvando()"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+              <span class="material-symbols-outlined text-base">save</span>
+              {{ salvando() ? 'Salvando...' : (editandoId() ? 'Salvar Alterações' : 'Cadastrar Fornecedor') }}
+            </button>
+            @if (editandoId()) {
+              <button
+                type="button"
+                (click)="limparFormulario()"
+                class="px-3.5 py-2.5 rounded-lg text-xs font-bold text-[#40493E] bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+                Cancelar
+              </button>
+            }
+          </div>
+        </form>
+      </div>
+
+      <!-- Supply Share Distribution Card -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-headline text-xs font-bold text-[#191C1B] uppercase tracking-wider">Participação no Abastecimento</h3>
+          <span class="text-[11px] font-semibold text-[#006D2F]">{{ produtos().length }} SKUs Totais</span>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          @for (item of participacaoFornecedores(); track item.fornecedor.id) {
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="font-semibold text-[#191C1B] truncate max-w-[190px]">{{ item.fornecedor.razaoSocial }}</span>
+                <span class="font-bold text-[#40493E]">{{ item.qtd }} SKUs ({{ item.percentual }}%)</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full rounded-full" [class]="item.corBarra" [style.width.%]="item.percentual"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

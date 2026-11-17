@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,8 +18,14 @@ interface ItemMenu {
 @Component({
   selector: 'app-admin-layout',
   imports: [
-    RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatToolbarModule,
-    MatListModule, MatIconModule, MatButtonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
   ],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css',
@@ -27,17 +33,23 @@ interface ItemMenu {
 export class AdminLayout {
   private breakpoint = inject(BreakpointObserver);
 
-  /** Em telas pequenas o menu vira "gaveta" (abre pelo botão). */
-  telaPequena = toSignal(this.breakpoint.observe('(max-width: 900px)').pipe(map((r) => r.matches)), {
+  telaPequena = toSignal(this.breakpoint.observe('(max-width: 1023px)').pipe(map((r) => r.matches)), {
     initialValue: false,
   });
 
+  menuMobileAberto = signal(false);
+
   menuCadastros: ItemMenu[] = [
     { rota: '/admin/produtos', rotulo: 'Produtos', icone: 'inventory_2' },
+    { rota: '/admin/estoque', rotulo: 'Estoque & Lotes', icone: 'inventory' },
     { rota: '/admin/categorias', rotulo: 'Categorias', icone: 'category' },
     { rota: '/admin/marcas', rotulo: 'Marcas', icone: 'verified' },
     { rota: '/admin/sabores', rotulo: 'Sabores', icone: 'icecream' },
     { rota: '/admin/fornecedores', rotulo: 'Fornecedores', icone: 'local_shipping' },
-    { rota: '/admin/clientes', rotulo: 'Clientes', icone: 'groups' },
+    { rota: '/admin/clientes', rotulo: 'Clientes', icone: 'group' },
   ];
+
+  fecharMenuMobile(): void {
+    this.menuMobileAberto.set(false);
+  }
 }

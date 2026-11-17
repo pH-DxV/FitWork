@@ -4,6 +4,8 @@ import { CategoriaForm } from './components/admin/categorias/categoria-form/cate
 import { CategoriaList } from './components/admin/categorias/categoria-list/categoria-list';
 import { ClienteForm } from './components/admin/clientes/cliente-form/cliente-form';
 import { ClienteList } from './components/admin/clientes/cliente-list/cliente-list';
+import { EstoqueLotes } from './components/admin/estoque/estoque-lotes/estoque-lotes';
+import { FornecedorDetalhe } from './components/admin/fornecedores/fornecedor-detalhe/fornecedor-detalhe';
 import { FornecedorForm } from './components/admin/fornecedores/fornecedor-form/fornecedor-form';
 import { FornecedorList } from './components/admin/fornecedores/fornecedor-list/fornecedor-list';
 import { MarcaForm } from './components/admin/marcas/marca-form/marca-form';
@@ -23,16 +25,16 @@ import { Perfil } from './components/loja/perfil/perfil';
 export const routes: Routes = [
   { path: '', redirectTo: 'loja', pathMatch: 'full' },
 
-  // ---------- e-commerce (protótipo) ----------
+  // ---------- e-commerce (vitrine & checkout B2B) ----------
   {
     path: 'loja',
     component: LojaLayout,
     children: [
-      { path: '', component: Catalogo, title: 'AuraFit | Suplementos' },
-      { path: 'carrinho', component: Carrinho, title: 'AuraFit | Carrinho' },
-      { path: 'pagamento', component: Pagamento, title: 'AuraFit | Pagamento' },
-      { path: 'login', component: Login, title: 'AuraFit | Entrar' },
-      { path: 'perfil', component: Perfil, title: 'AuraFit | Minha conta' },
+      { path: '', component: Catalogo, title: 'AuraFit | Vitrine & Loja Oficial' },
+      { path: 'carrinho', component: Carrinho, title: 'AuraFit | Cotação B2B & Carrinho' },
+      { path: 'pagamento', component: Pagamento, title: 'AuraFit | Checkout & Faturamento B2B' },
+      { path: 'login', component: Login, title: 'AuraFit | Acesso Corporativo & Lojista' },
+      { path: 'perfil', component: Perfil, title: 'AuraFit | Portal do Cliente & Meus Pedidos' },
     ],
   },
 
@@ -41,31 +43,35 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayout,
     children: [
-      { path: '', component: Painel, title: 'Admin | Início' },
+      { path: '', component: Painel, title: 'Admin | Painel Geral' },
+      { path: 'painel', redirectTo: '', pathMatch: 'full' },
 
-      { path: 'categorias', component: CategoriaList, title: 'Admin | Categorias' },
-      { path: 'categorias/nova', component: CategoriaForm, title: 'Admin | Nova categoria' },
-      { path: 'categorias/editar/:id', component: CategoriaForm, title: 'Admin | Editar categoria' },
+      { path: 'categorias', component: CategoriaList, title: 'Admin | Gestão de Categorias' },
+      { path: 'categorias/nova', component: CategoriaForm, title: 'Admin | Nova Categoria' },
+      { path: 'categorias/editar/:id', component: CategoriaForm, title: 'Admin | Editar Categoria' },
 
-      { path: 'marcas', component: MarcaList, title: 'Admin | Marcas' },
-      { path: 'marcas/nova', component: MarcaForm, title: 'Admin | Nova marca' },
-      { path: 'marcas/editar/:id', component: MarcaForm, title: 'Admin | Editar marca' },
+      { path: 'marcas', component: MarcaList, title: 'Admin | Gestão de Marcas' },
+      { path: 'marcas/nova', component: MarcaForm, title: 'Admin | Nova Marca' },
+      { path: 'marcas/editar/:id', component: MarcaForm, title: 'Admin | Editar Marca' },
 
-      { path: 'sabores', component: SaborList, title: 'Admin | Sabores' },
-      { path: 'sabores/novo', component: SaborForm, title: 'Admin | Novo sabor' },
-      { path: 'sabores/editar/:id', component: SaborForm, title: 'Admin | Editar sabor' },
+      { path: 'sabores', component: SaborList, title: 'Admin | Gestão de Sabores' },
+      { path: 'sabores/novo', component: SaborForm, title: 'Admin | Novo Sabor' },
+      { path: 'sabores/editar/:id', component: SaborForm, title: 'Admin | Editar Sabor' },
 
-      { path: 'fornecedores', component: FornecedorList, title: 'Admin | Fornecedores' },
-      { path: 'fornecedores/novo', component: FornecedorForm, title: 'Admin | Novo fornecedor' },
-      { path: 'fornecedores/editar/:id', component: FornecedorForm, title: 'Admin | Editar fornecedor' },
+      { path: 'fornecedores', component: FornecedorList, title: 'Admin | Gestão de Fornecedores' },
+      { path: 'fornecedores/novo', component: FornecedorForm, title: 'Admin | Novo Fornecedor' },
+      { path: 'fornecedores/editar/:id', component: FornecedorForm, title: 'Admin | Editar Fornecedor' },
+      { path: 'fornecedores/detalhes/:id', component: FornecedorDetalhe, title: 'Admin | Detalhes do Fornecedor' },
 
-      { path: 'produtos', component: ProdutoList, title: 'Admin | Produtos' },
-      { path: 'produtos/novo', component: ProdutoForm, title: 'Admin | Novo produto' },
-      { path: 'produtos/editar/:id', component: ProdutoForm, title: 'Admin | Editar produto' },
+      { path: 'produtos', component: ProdutoList, title: 'Admin | Gestão de Suplementos' },
+      { path: 'produtos/novo', component: ProdutoForm, title: 'Admin | Novo Suplemento' },
+      { path: 'produtos/editar/:id', component: ProdutoForm, title: 'Admin | Editar Suplemento' },
 
-      { path: 'clientes', component: ClienteList, title: 'Admin | Clientes' },
-      { path: 'clientes/novo', component: ClienteForm, title: 'Admin | Novo cliente' },
-      { path: 'clientes/editar/:id', component: ClienteForm, title: 'Admin | Editar cliente' },
+      { path: 'estoque', component: EstoqueLotes, title: 'Admin | Gestão de Estoque e Lotes' },
+
+      { path: 'clientes', component: ClienteList, title: 'Admin | Base de Clientes' },
+      { path: 'clientes/novo', component: ClienteForm, title: 'Admin | Novo Cliente' },
+      { path: 'clientes/editar/:id', component: ClienteForm, title: 'Admin | Editar Cliente' },
     ],
   },
 

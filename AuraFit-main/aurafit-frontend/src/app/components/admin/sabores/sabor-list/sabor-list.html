@@ -1,66 +1,367 @@
-<section class="pagina">
-  <header class="topo-pagina">
+<div class="space-y-6">
+  <!-- Breadcrumb & Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1>Sabores</h1>
-      <p class="subtitulo">Sabores disponíveis para os produtos.</p>
-    </div>
-    <a mat-flat-button routerLink="/admin/sabores/novo">
-      <mat-icon>add</mat-icon>
-      Novo sabor
-    </a>
-  </header>
-
-  <div class="cartao">
-    <mat-form-field appearance="outline" class="c4" style="width: 100%">
-      <mat-label>Buscar por nome</mat-label>
-      <input matInput #campoBusca (input)="buscar(campoBusca.value)" placeholder="Ex.: Chocolate" />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-
-    @if (erro()) {
-      <p class="mensagem-erro">{{ erro() }}</p>
-    }
-
-    <div class="tabela-container">
-      <table mat-table [dataSource]="sabores()" class="tabela">
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Nome</th>
-          <td mat-cell *matCellDef="let sabor"><strong>{{ sabor.nome }}</strong></td>
-        </ng-container>
-
-        <ng-container matColumnDef="descricao">
-          <th mat-header-cell *matHeaderCellDef>Descrição</th>
-          <td mat-cell *matCellDef="let sabor">{{ sabor.descricao ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let sabor" class="acoes">
-            <a mat-icon-button [routerLink]="['/admin/sabores/editar', sabor.id]" aria-label="Editar">
-              <mat-icon>edit</mat-icon>
-            </a>
-            <button mat-icon-button (click)="excluir(sabor)" aria-label="Excluir">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
-            {{ carregando() ? 'Carregando...' : 'Nenhum sabor encontrado.' }}
-          </td>
-        </tr>
-      </table>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F] transition-colors">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">Gestão de Sabores</span>
+      </nav>
+      <div class="flex items-center gap-3">
+        <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">Gestão de Sabores</h1>
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#2E7D32]/10 text-[#006D2F]">
+          {{ totalItems() }} Sabores Cadastrados
+        </span>
+      </div>
+      <p class="text-xs text-[#40493E] mt-0.5">
+        Padronização sensorial, tags cromáticas da vitrine e vínculo N:N com o catálogo de suplementos.
+      </p>
     </div>
 
-    <mat-paginator
-      [length]="totalItems()"
-      [pageIndex]="pageIndex()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="mudarPagina($event)"
-    />
+    <div class="flex items-center gap-2.5">
+      <button
+        type="button"
+        (click)="limparFormulario()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-[#191C1B] bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-xs">
+        <span class="material-symbols-outlined text-base">restart_alt</span>
+        Limpar Formulário
+      </button>
+      <a
+        routerLink="/admin/sabores/novo"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        Novo Sabor
+      </a>
+    </div>
   </div>
-</section>
+
+  <!-- 4 Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Total de Sabores</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ totalItems() }}</p>
+        <p class="text-[11px] text-[#006D2F] font-semibold mt-0.5">100% disponíveis para vínculo</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#2E7D32]/10 text-[#006D2F] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">icecream</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Sabor Líder em SKUs</p>
+        <p class="font-headline text-lg font-extrabold text-[#191C1B] mt-1 truncate max-w-[170px]">
+          {{ saborLider()?.sabor?.nome || 'Baunilha' }}
+        </p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">Presente em {{ saborLider()?.qtd || 0 }} produtos</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">workspace_premium</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Relacionamento N:N</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">Multi-Sabor</p>
+        <p class="text-[11px] text-[#00695C] font-semibold mt-0.5">Múltiplos sabores por produto</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#00695C]/10 text-[#00695C] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">hub</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Validação de Unicidade</p>
+        <p class="font-headline text-lg font-extrabold text-[#191C1B] mt-1">Nome Único</p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">Sem duplicidade no banco</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">verified</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Split Layout (8 cols Table / 4 cols Side Form) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Flavors Data Table (8 columns) -->
+    <div class="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <!-- Table Filter Bar -->
+      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F8FAF8]/60">
+        <div class="relative flex-1 max-w-md">
+          <span class="material-symbols-outlined text-slate-400 text-lg absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input
+            type="text"
+            [value]="filtro()"
+            (input)="buscar($any($event.target).value)"
+            placeholder="Filtrar sabor por nome ou notas sensoriais..."
+            class="w-full pl-9 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15 text-[#191C1B] font-medium" />
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-[#40493E] font-medium">Exibindo:</span>
+          <span class="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-xs font-bold text-[#191C1B]">
+            Todos ({{ totalItems() }})
+          </span>
+        </div>
+      </div>
+
+      @if (erro()) {
+        <div class="m-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">error</span>
+          <span>{{ erro() }}</span>
+        </div>
+      }
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-[#40493E] uppercase tracking-wider">
+              <th class="py-3.5 px-4">ID</th>
+              <th class="py-3.5 px-4">Sabor & Perfil Sensorial</th>
+              <th class="py-3.5 px-4">Tag Visual</th>
+              <th class="py-3.5 px-4 text-center">Produtos (N:N)</th>
+              <th class="py-3.5 px-4 text-center">Status</th>
+              <th class="py-3.5 px-4 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            @for (sabor of sabores(); track sabor.id) {
+              @let paleta = paletaVisual(sabor);
+              <tr
+                class="hover:bg-slate-50/90 transition-colors cursor-pointer"
+                [class.bg-[#2E7D32]/5]="editandoId() === sabor.id"
+                (click)="selecionarParaEdicao(sabor)">
+                <td class="py-3.5 px-4 font-mono font-bold text-[#40493E]">
+                  #SAB-{{ sabor.id.toString().padStart(3, '0') }}
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 shadow-2xs"
+                      [style.background-color]="paleta.hex"
+                      [class]="paleta.borda + ' ' + paleta.texto">
+                      <span class="material-symbols-outlined text-base">icecream</span>
+                    </span>
+                    <div>
+                      <p class="font-bold text-[#191C1B] text-sm">{{ sabor.nome }}</p>
+                      <p class="text-[11px] text-[#40493E] line-clamp-1">
+                        {{ sabor.descricao || 'Perfil sensorial homologado para linha de suplementos AuraFit.' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-50 text-[#191C1B] border border-slate-200">
+                    <span class="w-2.5 h-2.5 rounded-full border border-slate-400" [style.background-color]="paleta.hex"></span>
+                    {{ paleta.hex }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-[#191C1B]">
+                    {{ qtdProdutos(sabor.id) }} SKUs
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Ativo
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right" (click)="$event.stopPropagation()">
+                  <div class="inline-flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      (click)="selecionarParaEdicao(sabor)"
+                      class="p-1.5 rounded-lg text-[#006D2F] hover:bg-[#2E7D32]/10 transition-colors"
+                      title="Editar no painel lateral">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                    </button>
+                    <a
+                      [routerLink]="['/admin/sabores/editar', sabor.id]"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-[#191C1B] hover:bg-slate-100 transition-colors"
+                      title="Abrir tela dedicada de edição">
+                      <span class="material-symbols-outlined text-base">open_in_new</span>
+                    </a>
+                    <button
+                      type="button"
+                      (click)="excluir(sabor)"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-[#BA1A1A] hover:bg-red-50 transition-colors"
+                      title="Excluir Sabor">
+                      <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="py-10 text-center text-xs text-[#40493E]">
+                  {{ carregando() ? 'Carregando sabores...' : 'Nenhum sabor encontrado.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="px-4 py-2 border-t border-slate-100 bg-[#F8FAF8]/60">
+        <mat-paginator
+          [length]="totalItems()"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[5, 10, 25]"
+          (page)="mudarPagina($event)"
+          showFirstLastButtons />
+      </div>
+    </div>
+
+    <!-- Right Column: Quick Create / Edit Form + Sensory Distribution (4 columns) -->
+    <div class="lg:col-span-4 space-y-5">
+      <!-- Form Card -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-100 bg-[#F8FAF8] flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center">
+              <span class="material-symbols-outlined text-base">{{ editandoId() ? 'edit_square' : 'add_circle' }}</span>
+            </div>
+            <div>
+              <h2 class="font-headline text-sm font-bold text-[#191C1B]">
+                {{ editandoId() ? 'Editar Sabor' : 'Novo Sabor' }}
+              </h2>
+              <p class="text-[11px] text-[#40493E]">
+                {{ editandoId() ? 'Editando registro #SAB-' + editandoId()!.toString().padStart(3, '0') : 'Preencha os campos da entidade Sabor' }}
+              </p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2E7D32]/10 text-[#006D2F] uppercase">
+            {{ editandoId() ? 'Modo Edição' : 'Novo Registro' }}
+          </span>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="salvarInline()" class="p-5 space-y-4">
+          @if (erroFormulario()) {
+            <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">error</span>
+              <span>{{ erroFormulario() }}</span>
+            </div>
+          }
+
+          <!-- Nome do Sabor -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">Nome do Sabor <span class="text-[#BA1A1A]">*</span></label>
+              <span class="text-[10px] font-medium text-[#40493E]">2 a 80 caracteres</span>
+            </div>
+            <div class="relative">
+              <span class="material-symbols-outlined text-slate-400 text-base absolute left-3 top-1/2 -translate-y-1/2">icecream</span>
+              <input
+                type="text"
+                formControlName="nome"
+                maxlength="80"
+                placeholder="Ex: Baunilha Francesa"
+                class="w-full pl-9 pr-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15" />
+            </div>
+            @if (form.controls.nome.touched && form.controls.nome.invalid) {
+              <p class="text-[11px] text-[#BA1A1A] font-medium mt-1">{{ mensagemErro('nome') }}</p>
+            } @else {
+              <p class="text-[11px] text-[#40493E] mt-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-[#006D2F]">check_circle</span>
+                Nome único validado (`nome` não pode repetir).
+              </p>
+            }
+          </div>
+
+          <!-- Tag Cromática (Auxiliar Visual Vitrine) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">Cor da Tag na Vitrine</label>
+              <span class="text-[10px] font-mono text-[#40493E]">{{ corSelecionada() }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              @for (cor of coresSugeridas; track cor) {
+                <button
+                  type="button"
+                  (click)="corSelecionada.set(cor)"
+                  class="w-7 h-7 rounded-lg border shadow-2xs transition-transform cursor-pointer"
+                  [style.background-color]="cor"
+                  [class]="corSelecionada() === cor ? 'ring-2 ring-[#2E7D32] scale-105 border-[#006D2F]' : 'border-slate-300'"></button>
+              }
+            </div>
+          </div>
+
+          <!-- Descrição / Notas Sensoriais -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-[#191C1B]">Descrição / Notas Sensoriais</label>
+              <span class="text-[10px] font-medium text-[#40493E]">Opcional · Máx. 255 caracteres</span>
+            </div>
+            <textarea
+              rows="3"
+              formControlName="descricao"
+              maxlength="255"
+              placeholder="Descreva o perfil aromático, dulçor e notas gustativas do sabor..."
+              class="w-full p-3 text-xs text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15 resize-none leading-relaxed"></textarea>
+            <div class="flex justify-between mt-1 text-[11px] text-[#40493E]">
+              <span>Exibido no seletor de sabores da loja</span>
+              <span>{{ form.controls.descricao.value.length }} / 255</span>
+            </div>
+          </div>
+
+          <!-- N:N Info Box -->
+          <div class="p-3 rounded-xl bg-[#F8FAF8] border border-slate-200/80 flex items-start gap-2.5 text-[11px] text-[#40493E]">
+            <span class="material-symbols-outlined text-base text-[#00695C] shrink-0 mt-0.5">hub</span>
+            <div>
+              <p class="font-bold text-[#191C1B]">Associação N:N com Produtos</p>
+              <p class="mt-0.5">
+                Um sabor pode estar vinculado a múltiplos suplementos (`Produto.sabores`), e um suplemento pode oferecer múltiplos sabores simultaneamente.
+              </p>
+            </div>
+          </div>
+
+          <!-- Form Action Buttons -->
+          <div class="pt-2 flex items-center gap-2">
+            <button
+              type="submit"
+              [disabled]="salvando()"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+              <span class="material-symbols-outlined text-base">save</span>
+              {{ salvando() ? 'Salvando...' : (editandoId() ? 'Salvar Alterações' : 'Cadastrar Sabor') }}
+            </button>
+            @if (editandoId()) {
+              <button
+                type="button"
+                (click)="limparFormulario()"
+                class="px-3.5 py-2.5 rounded-lg text-xs font-bold text-[#40493E] bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+                Cancelar
+              </button>
+            }
+          </div>
+        </form>
+      </div>
+
+      <!-- Top Flavors Distribution Card -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-headline text-xs font-bold text-[#191C1B] uppercase tracking-wider">Preferência no Catálogo</h3>
+          <span class="text-[11px] font-semibold text-[#006D2F]">Top Sabores</span>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          @for (item of preferenciaCatalogo(); track item.sabor.id) {
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="font-semibold text-[#191C1B]">{{ item.sabor.nome }}</span>
+                <span class="font-bold text-[#40493E]">{{ item.qtd }} SKUs ({{ item.percentual }}%)</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full rounded-full" [class]="item.corBarra" [style.width.%]="item.percentual"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

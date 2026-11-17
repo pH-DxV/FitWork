@@ -1,6 +1,7 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,7 +11,16 @@ import { SessaoService } from '../../../services/sessao.service';
 
 @Component({
   selector: 'app-loja-layout',
-  imports: [RouterOutlet, RouterLink, MatButtonModule, MatIconModule, MatBadgeModule, MatMenuModule],
+  imports: [
+    CurrencyPipe,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatButtonModule,
+    MatIconModule,
+    MatBadgeModule,
+    MatMenuModule,
+  ],
   templateUrl: './loja-layout.html',
   styleUrl: './loja-layout.css',
 })
@@ -31,6 +41,12 @@ export class LojaLayout {
 
   pesquisar(termo: string): void {
     this.router.navigate(['/loja'], { queryParams: { busca: termo.trim() || null } });
+  }
+
+  limparBusca(input: HTMLInputElement): void {
+    input.value = '';
+    this.termoBusca.set('');
+    this.pesquisar('');
   }
 
   sair(): void {

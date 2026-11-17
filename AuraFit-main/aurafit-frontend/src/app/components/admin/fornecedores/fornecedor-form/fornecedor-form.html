@@ -1,51 +1,88 @@
-<section class="pagina estreita">
-  <a mat-button routerLink="/admin/fornecedores" class="voltar">
-    <mat-icon>arrow_back</mat-icon>
-    Voltar para fornecedores
-  </a>
-
-  <header class="topo-pagina">
-    <h1>{{ id() ? 'Editar fornecedor' : 'Novo fornecedor' }}</h1>
-  </header>
+<div class="max-w-2xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F]">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <a routerLink="/admin/fornecedores" class="hover:text-[#006D2F]">Gestão de Fornecedores</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">{{ id() ? 'Editar Fornecedor' : 'Novo Fornecedor' }}</span>
+      </nav>
+      <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">
+        {{ id() ? 'Editar Fornecedor' : 'Novo Fornecedor Homologado' }}
+      </h1>
+    </div>
+    <a
+      routerLink="/admin/fornecedores"
+      class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold text-[#40493E] bg-white border border-slate-200 hover:bg-slate-50">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Voltar
+    </a>
+  </div>
 
   @if (erroGeral()) {
-    <p class="mensagem-erro">{{ erroGeral() }}</p>
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">error</span>
+      <span>{{ erroGeral() }}</span>
+    </div>
   }
 
-  @if (carregando()) {
-    <p>Carregando...</p>
-  } @else {
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
-      <mat-form-field appearance="outline" class="c4">
+  <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div class="p-4 border-b border-slate-100 bg-[#F8FAF8] flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-base">local_shipping</span>
+        </div>
+        <div>
+          <h2 class="font-headline text-sm font-bold text-[#191C1B]">Dados Fiscais e Comerciais do Distribuidor</h2>
+          <p class="text-[11px] text-[#40493E]">Validação de CNPJ e canais de abastecimento</p>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="p-6 space-y-4">
+      <mat-form-field appearance="outline" class="w-full">
         <mat-label>Razão social</mat-label>
-        <input matInput formControlName="razaoSocial" placeholder="Ex.: Distribuidora Fit LTDA" />
+        <input matInput formControlName="razaoSocial" maxlength="120" />
         <mat-error>{{ mensagemErro('razaoSocial') }}</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>CNPJ</mat-label>
-        <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" maxlength="18" (blur)="formatarCnpj()" />
-        <mat-error>{{ mensagemErro('cnpj') }}</mat-error>
-      </mat-form-field>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>CNPJ</mat-label>
+          <input matInput formControlName="cnpj" placeholder="00.000.000/0000-00" (blur)="formatarCnpj()" />
+          <mat-hint>14 dígitos</mat-hint>
+          <mat-error>{{ mensagemErro('cnpj') }}</mat-error>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c2">
-        <mat-label>Telefone</mat-label>
-        <input matInput formControlName="telefone" placeholder="(63) 99999-0000" maxlength="16" (blur)="formatarTelefone()" />
-        <mat-error>{{ mensagemErro('telefone') }}</mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Telefone</mat-label>
+          <input matInput formControlName="telefone" placeholder="(00) 00000-0000" (blur)="formatarTelefone()" />
+          <mat-hint>DDD + número (10 ou 11 dígitos)</mat-hint>
+          <mat-error>{{ mensagemErro('telefone') }}</mat-error>
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>E-mail (opcional)</mat-label>
-        <input matInput type="email" formControlName="email" placeholder="compras@fornecedor.com.br" />
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>E-mail</mat-label>
+        <input matInput type="email" formControlName="email" maxlength="100" />
         <mat-error>{{ mensagemErro('email') }}</mat-error>
       </mat-form-field>
 
-      <div class="botoes">
-        <a mat-stroked-button routerLink="/admin/fornecedores">Cancelar</a>
-        <button mat-flat-button type="submit" [disabled]="salvando()">
-          {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <a
+          routerLink="/admin/fornecedores"
+          class="px-4 py-2.5 rounded-lg text-xs font-bold text-[#40493E] bg-slate-100 hover:bg-slate-200 transition-colors">
+          Cancelar
+        </a>
+        <button
+          type="submit"
+          [disabled]="salvando() || carregando()"
+          class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+          <span class="material-symbols-outlined text-base">save</span>
+          {{ salvando() ? 'Salvando...' : 'Salvar Fornecedor' }}
         </button>
       </div>
     </form>
-  }
-</section>
+  </div>
+</div>

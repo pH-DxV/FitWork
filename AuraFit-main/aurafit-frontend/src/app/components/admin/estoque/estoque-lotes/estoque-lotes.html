@@ -1,0 +1,437 @@
+<div class="space-y-6">
+  <!-- Breadcrumb & Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F] transition-colors">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">Gestão de Estoque e Lotes</span>
+      </nav>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">
+          Gestão de Estoque & Rastreabilidade de Lotes
+        </h1>
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#2E7D32]/10 text-[#006D2F]">
+          Padrão FEFO · ANVISA RDC 240/2018
+        </span>
+      </div>
+      <p class="text-xs text-[#40493E] mt-0.5">
+        Controle físico-financeiro de suplementos (`Produto.estoque`), validade por lote de fabricação, laudos HPLC e vínculo com Notas Fiscais de entrada.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button
+        type="button"
+        (click)="exportarInventario()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-[#191C1B] bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-xs cursor-pointer">
+        <span class="material-symbols-outlined text-base">summarize</span>
+        Inventário Fiscal (SPED)
+      </button>
+      <a
+        routerLink="/admin/produtos"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs">
+        <span class="material-symbols-outlined text-base">inventory_2</span>
+        Ver Catálogo de Suplementos
+      </a>
+    </div>
+  </div>
+
+  <!-- 4 Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Total em Estoque</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">
+          {{ totalUnidadesEstoque() }} un.
+        </p>
+        <p class="text-[11px] text-[#006D2F] font-semibold mt-0.5">
+          Distribuídos em {{ produtos().length }} SKUs ativos
+        </p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#2E7D32]/10 text-[#006D2F] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">warehouse</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Valor Imobilizado</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">
+          {{ valorImobilizadoEstoque() | currency: 'BRL' }}
+        </p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">Custo médio ponderado auditado</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#00695C]/10 text-[#00695C] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Alerta FEFO / Reposição</p>
+        <p class="font-headline text-2xl font-extrabold text-amber-700 mt-1">
+          {{ alertasFefoCount() }} Lotes
+        </p>
+        <p class="text-[11px] text-amber-800 font-semibold mt-0.5">Prioridade de giro comercial</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">event_upcoming</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Status de Quarentena</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">
+          {{ quarentenaCount() }} Lote(s)
+        </p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">Aguardando laudo microbiológico</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">biotech</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Split Layout (8 cols Table / 4 cols Side Form) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Batch Inventory Table (8 columns) -->
+    <div class="lg:col-span-8 bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <!-- Filter & Search Bar -->
+      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#F8FAF8]/60">
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined text-slate-400 text-lg absolute left-3 top-1/2 -translate-y-1/2">search</span>
+          <input
+            type="text"
+            [value]="busca()"
+            (input)="busca.set($any($event.target).value)"
+            placeholder="Buscar por código do lote (LT-2026...), produto, NF-e ou marca..."
+            class="w-full pl-9 pr-4 py-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15 text-[#191C1B] font-medium" />
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select
+            [value]="filtroFornecedorId() ?? ''"
+            (change)="filtroFornecedorId.set($any($event.target).value ? +$any($event.target).value : null)"
+            class="px-2.5 py-1.5 text-xs font-semibold text-[#191C1B] bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F]">
+            <option value="">Fornecedor: Todos</option>
+            @for (forn of fornecedores(); track forn.id) {
+              <option [value]="forn.id">{{ forn.razaoSocial }}</option>
+            }
+          </select>
+
+          <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs font-semibold">
+            <button
+              type="button"
+              (click)="filtroStatus.set('TODOS')"
+              [class]="filtroStatus() === 'TODOS' ? 'px-2.5 py-1 rounded-md bg-[#2E7D32] text-white' : 'px-2.5 py-1 rounded-md text-[#40493E] hover:text-[#191C1B]'">
+              Todos ({{ lotes().length }})
+            </button>
+            <button
+              type="button"
+              (click)="filtroStatus.set('LIBERADO')"
+              [class]="filtroStatus() === 'LIBERADO' ? 'px-2.5 py-1 rounded-md bg-[#2E7D32] text-white' : 'px-2.5 py-1 rounded-md text-[#40493E] hover:text-[#191C1B]'">
+              Liberados
+            </button>
+            <button
+              type="button"
+              (click)="filtroStatus.set('ALERTA_FEFO')"
+              [class]="filtroStatus() === 'ALERTA_FEFO' ? 'px-2.5 py-1 rounded-md bg-amber-600 text-white' : 'px-2.5 py-1 rounded-md text-amber-700 hover:bg-amber-50'">
+              Alerta FEFO ({{ alertasFefoCount() }})
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-[#40493E] uppercase tracking-wider">
+              <th class="py-3.5 px-4">Lote & NF-e</th>
+              <th class="py-3.5 px-4">Produto / Marca & Sabor</th>
+              <th class="py-3.5 px-4">Fornecedor</th>
+              <th class="py-3.5 px-4 text-center">Validade (FEFO)</th>
+              <th class="py-3.5 px-4 text-center">Saldo (`estoque`)</th>
+              <th class="py-3.5 px-4 text-center">Qualidade</th>
+              <th class="py-3.5 px-4 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-xs">
+            @for (lote of lotesFiltrados(); track lote.id) {
+              <tr
+                class="hover:bg-slate-50/90 transition-colors cursor-pointer"
+                [class.bg-amber-50/30]="lote.statusQualidade === 'ALERTA_FEFO'"
+                (click)="selecionarLoteNaTabela(lote)">
+                <td class="py-3.5 px-4">
+                  <span class="font-mono font-bold text-[#191C1B] block">{{ lote.codigoLote }}</span>
+                  <span class="font-mono text-[11px] text-[#40493E]">NF-e {{ lote.notaFiscal }}</span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <p class="font-bold text-[#191C1B] text-sm">{{ lote.produto.nome }}</p>
+                  <p class="text-[11px] text-[#40493E]">
+                    {{ lote.produto.marca.nome }} · {{ lote.produto.pesoGramas }}g
+                    @if (lote.produto.sabores.length > 0) {
+                      · Sabor: {{ lote.produto.sabores[0].nome }}
+                    }
+                  </p>
+                </td>
+                <td class="py-3.5 px-4">
+                  @if (lote.produto.fornecedor; as forn) {
+                    <a
+                      [routerLink]="['/admin/fornecedores/detalhes', forn.id]"
+                      (click)="$event.stopPropagation()"
+                      class="font-semibold text-[#191C1B] hover:text-[#006D2F] block truncate max-w-[150px]">
+                      {{ forn.razaoSocial }}
+                    </a>
+                    <span class="text-[10px] font-mono text-[#40493E]">#FOR-{{ forn.id.toString().padStart(3, '0') }}</span>
+                  } @else {
+                    <span class="text-slate-400 italic">Direto da Fábrica</span>
+                  }
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span
+                    class="font-mono font-bold block"
+                    [class]="lote.statusQualidade === 'ALERTA_FEFO' ? 'text-amber-800' : 'text-[#191C1B]'">
+                    {{ lote.validade }}
+                  </span>
+                  <span
+                    class="text-[10px] font-semibold"
+                    [class]="lote.statusQualidade === 'ALERTA_FEFO' ? 'text-amber-700 font-bold' : 'text-[#006D2F]'">
+                    Vence em {{ lote.diasParaVencer }} dias
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-center font-mono font-extrabold text-[#191C1B]">
+                  {{ lote.produto.estoque }} un.
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  @if (lote.statusQualidade === 'LIBERADO') {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      Liberado
+                    </span>
+                  } @else if (lote.statusQualidade === 'ALERTA_FEFO') {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                      Giro Prioritário
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                      <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                      Quarentena CQ
+                    </span>
+                  }
+                </td>
+                <td class="py-3.5 px-4 text-right" (click)="$event.stopPropagation()">
+                  <div class="inline-flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      (click)="selecionarLoteNaTabela(lote)"
+                      class="p-1.5 rounded-lg text-[#006D2F] hover:bg-[#2E7D32]/10 transition-colors cursor-pointer"
+                      title="Selecionar para Entrada de Estoque">
+                      <span class="material-symbols-outlined text-base">add_box</span>
+                    </button>
+                    <a
+                      [routerLink]="['/admin/produtos/editar', lote.produto.id]"
+                      class="p-1.5 rounded-lg text-slate-500 hover:text-[#191C1B] hover:bg-slate-100 transition-colors"
+                      title="Editar Suplemento">
+                      <span class="material-symbols-outlined text-base">edit</span>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="py-10 text-center text-xs text-[#40493E]">
+                  {{ carregando() ? 'Carregando lotes e estoque...' : 'Nenhum lote encontrado para os filtros aplicados.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Column: Registrar Entrada de Lote / Movimentação (4 columns) -->
+    <div class="lg:col-span-4 space-y-5">
+      <!-- Batch Entry Form Card -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-100 bg-[#F8FAF8] flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center">
+              <span class="material-symbols-outlined text-base"> qr_code_scanner </span>
+            </div>
+            <div>
+              <h2 class="font-headline text-sm font-bold text-[#191C1B]">Entrada de Lote</h2>
+              <p class="text-[11px] text-[#40493E]">Incrementa `Produto.estoque` com rastreabilidade</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2E7D32]/10 text-[#006D2F] uppercase">
+            Recebimento
+          </span>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="registrarEntradaLote()" class="p-5 space-y-4">
+          <!-- Produto Vinculado -->
+          <div>
+            <label class="block text-xs font-bold text-[#191C1B] mb-1">
+              Suplemento (`Produto`) <span class="text-[#BA1A1A]">*</span>
+            </label>
+            <select
+              formControlName="produtoId"
+              (change)="aoSelecionarProduto($any($event.target).value)"
+              class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]">
+              @for (prod of produtos(); track prod.id) {
+                <option [value]="prod.id">
+                  #PRD-{{ prod.id.toString().padStart(3, '0') }} · {{ prod.nome }} (Saldo: {{ prod.estoque }} un.)
+                </option>
+              }
+            </select>
+          </div>
+
+          <!-- Fornecedor & Sabor -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Fornecedor (`Fornecedor`)</label>
+              <select
+                formControlName="fornecedorId"
+                class="w-full px-2.5 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]">
+                <option [value]="0">Direto da Fábrica</option>
+                @for (forn of fornecedores(); track forn.id) {
+                  <option [value]="forn.id">{{ forn.razaoSocial }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Sabor (`Sabor`)</label>
+              <select
+                formControlName="saborId"
+                class="w-full px-2.5 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]">
+                <option [value]="0">Padrão / Neutro</option>
+                @for (sab of sabores(); track sab.id) {
+                  <option [value]="sab.id">{{ sab.nome }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Código do Lote & NF-e -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Código do Lote <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="codigoLote"
+                placeholder="Ex: LT-2026-098A"
+                class="w-full px-3 py-2 text-xs font-mono font-bold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Nº Nota Fiscal <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="notaFiscal"
+                placeholder="000.421.880"
+                class="w-full px-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+          </div>
+
+          <!-- Fabricação & Validade -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Data de Fabricação</label>
+              <input
+                type="date"
+                formControlName="dataFabricacao"
+                class="w-full px-2.5 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Data de Validade <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="date"
+                formControlName="dataValidade"
+                class="w-full px-2.5 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+          </div>
+
+          <!-- Quantidade & Custo Unitário -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Qtd. Recebida (un.) <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="quantidadeEntrada"
+                min="1"
+                class="w-full px-3 py-2 text-xs font-mono font-extrabold text-[#006D2F] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Custo Unit. B2B (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                formControlName="custoUnitario"
+                class="w-full px-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+          </div>
+
+          <!-- Laudo HPLC Check -->
+          <div class="p-3 rounded-xl bg-[#F8FAF8] border border-slate-200/80">
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="laudoHplcAprovado"
+                class="mt-0.5 w-4 h-4 rounded text-[#2E7D32] focus:ring-[#2E7D32]" />
+              <div class="text-xs">
+                <p class="font-bold text-[#191C1B]">Laudo Laboratorial HPLC Conferido</p>
+                <p class="text-[11px] text-[#40493E]">
+                  Liberar lote imediatamente para faturamento na vitrine (sem quarentena).
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="salvando()"
+            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+            <span class="material-symbols-outlined text-base">add_task</span>
+            {{ salvando() ? 'Atualizando Estoque...' : 'Confirmar Entrada & Somar ao Estoque' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Warehouse Telemetry Card -->
+      <div class="bg-[#191C1B] text-white rounded-xl p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+            Telemetria CD Barueri / SP
+          </span>
+          <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Climatizado
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5 text-xs">
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/10">
+            <p class="text-[10px] text-slate-400 uppercase">Temperatura Média</p>
+            <p class="font-mono font-bold text-sm text-white mt-0.5">21,4 °C</p>
+          </div>
+          <div class="p-2.5 rounded-lg bg-white/5 border border-white/10">
+            <p class="text-[10px] text-slate-400 uppercase">Umidade Relativa</p>
+            <p class="font-mono font-bold text-sm text-white mt-0.5">48% UR</p>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Condições ambientais monitoradas conforme exigência ANVISA para conservação de proteínas isoladas e aminoácidos higroscópicos.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

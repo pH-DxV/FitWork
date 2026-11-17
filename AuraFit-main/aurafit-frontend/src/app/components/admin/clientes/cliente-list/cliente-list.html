@@ -1,89 +1,624 @@
-<section class="pagina">
-  <header class="topo-pagina">
+<div class="space-y-6">
+  <!-- Breadcrumb & Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1>Clientes</h1>
-      <p class="subtitulo">Pessoas cadastradas com endereço estruturado por município e estado.</p>
+      <nav class="flex items-center gap-1.5 text-xs font-medium text-[#40493E] mb-1">
+        <a routerLink="/admin/painel" class="hover:text-[#006D2F] transition-colors">Admin</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-[#191C1B] font-semibold">Base de Clientes</span>
+      </nav>
+      <div class="flex items-center gap-3">
+        <h1 class="font-headline text-2xl font-extrabold text-[#191C1B] tracking-tight">Gestão de Clientes</h1>
+        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#2E7D32]/10 text-[#006D2F]">
+          {{ totalItems() }} Clientes Cadastrados
+        </span>
+      </div>
+      <p class="text-xs text-[#40493E] mt-0.5">
+        Gerenciamento de clientes, validação de CPF, múltiplos contatos telefônicos (`FormArray`) e endereços integrados ao ViaCEP.
+      </p>
     </div>
-    <a mat-flat-button routerLink="/admin/clientes/novo">
-      <mat-icon>person_add</mat-icon>
-      Novo cliente
-    </a>
-  </header>
 
-  <div class="cartao">
-    <mat-form-field appearance="outline" style="width: 100%">
-      <mat-label>Buscar por nome</mat-label>
-      <input matInput #campoBusca (input)="buscar(campoBusca.value)" placeholder="Ex.: Ana" />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+    <div class="flex items-center gap-2.5">
+      <button
+        type="button"
+        (click)="exportarRelatorio()"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-[#191C1B] bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-xs cursor-pointer">
+        <span class="material-symbols-outlined text-base">download</span>
+        Exportar Relatório
+      </button>
+      <a
+        routerLink="/admin/clientes/novo"
+        class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-bold text-[#006D2F] bg-[#2E7D32]/10 hover:bg-[#2E7D32]/20 transition-all">
+        <span class="material-symbols-outlined text-base">open_in_new</span>
+        Página Completa
+      </a>
+      <button
+        type="button"
+        (click)="abrirNovoClienteDrawer()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs cursor-pointer">
+        <span class="material-symbols-outlined text-base">person_add</span>
+        Novo Cliente
+      </button>
+    </div>
+  </div>
 
-    @if (erro()) {
-      <p class="mensagem-erro">{{ erro() }}</p>
-    }
+  <!-- 4 Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Total de Clientes</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ totalItems() }}</p>
+        <p class="text-[11px] text-[#006D2F] font-semibold mt-0.5">CPFs únicos validados</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#2E7D32]/10 text-[#006D2F] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">group</span>
+      </div>
+    </div>
 
-    <div class="tabela-container">
-      <table mat-table [dataSource]="clientes()" class="tabela">
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Nome</th>
-          <td mat-cell *matCellDef="let cliente">
-            <strong>{{ cliente.nome }}</strong>
-            <span class="texto-secundario">{{ cliente.email }}</span>
-          </td>
-        </ng-container>
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Clientes Ativos</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ clientesAtivosCount() }}</p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">{{ clientesOptInCount() }} aceitam novidades (Opt-in)</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">verified_user</span>
+      </div>
+    </div>
 
-        <ng-container matColumnDef="cpf">
-          <th mat-header-cell *matHeaderCellDef>CPF</th>
-          <td mat-cell *matCellDef="let cliente">{{ cliente.cpf | formato: 'cpf' }}</td>
-        </ng-container>
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Cobertura Geográfica</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ estados().length || 27 }} Estados</p>
+        <p class="text-[11px] text-[#00695C] font-semibold mt-0.5">5 Regiões IBGE integradas</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-[#00695C]/10 text-[#00695C] flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">map</span>
+      </div>
+    </div>
 
-        <ng-container matColumnDef="telefone">
-          <th mat-header-cell *matHeaderCellDef>Telefone</th>
-          <td mat-cell *matCellDef="let cliente">{{ telefonePrincipal(cliente) | formato: 'telefone' }}</td>
-        </ng-container>
+    <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-xs flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#40493E] uppercase tracking-wider">Múltiplos Contatos</p>
+        <p class="font-headline text-2xl font-extrabold text-[#191C1B] mt-1">{{ totalTelefonesCount() }} Telefones</p>
+        <p class="text-[11px] text-[#40493E] mt-0.5">{{ whatsappCount() }} números com WhatsApp ativo</p>
+      </div>
+      <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+        <span class="material-symbols-outlined text-xl">perm_phone_msg</span>
+      </div>
+    </div>
+  </div>
 
-        <ng-container matColumnDef="cidade">
-          <th mat-header-cell *matHeaderCellDef>Cidade / UF</th>
-          <td mat-cell *matCellDef="let cliente">
-            {{ cliente.endereco.municipio.nome }} / {{ cliente.endereco.municipio.estado.sigla }}
-            <span class="texto-secundario">CEP {{ cliente.endereco.cep | formato: 'cep' }}</span>
-          </td>
-        </ng-container>
+  <!-- Filter & Search Bar -->
+  <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+    <div class="relative flex-1">
+      <span class="material-symbols-outlined text-slate-400 text-lg absolute left-3 top-1/2 -translate-y-1/2">search</span>
+      <input
+        type="text"
+        [value]="filtro()"
+        (input)="buscar($any($event.target).value)"
+        placeholder="Buscar cliente por nome, CPF, e-mail, cidade ou telefone..."
+        class="w-full pl-9 pr-4 py-2 text-xs bg-[#F8FAF8] border border-slate-200 rounded-lg focus:outline-none focus:bg-white focus:border-[#006D2F] focus:ring-2 focus:ring-[#2E7D32]/15 text-[#191C1B] font-medium" />
+    </div>
+    <div class="flex flex-wrap items-center gap-2.5">
+      <select
+        [value]="filtroUf()"
+        (change)="filtroUf.set($any($event.target).value)"
+        class="px-3 py-2 text-xs font-semibold text-[#191C1B] bg-[#F8FAF8] border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F]">
+        <option value="">Estado (UF): Todos</option>
+        @for (est of estados(); track est.id) {
+          <option [value]="est.sigla">{{ est.sigla }} - {{ est.nome }}</option>
+        }
+      </select>
+      <select
+        [value]="filtroRegiao()"
+        (change)="filtroRegiao.set($any($event.target).value)"
+        class="px-3 py-2 text-xs font-semibold text-[#191C1B] bg-[#F8FAF8] border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F]">
+        <option value="">Região: Todas (5)</option>
+        <option value="Sudeste">Sudeste</option>
+        <option value="Sul">Sul</option>
+        <option value="Centro-Oeste">Centro-Oeste</option>
+        <option value="Nordeste">Nordeste</option>
+        <option value="Norte">Norte</option>
+      </select>
+      <select
+        [value]="filtroStatus()"
+        (change)="filtroStatus.set($any($event.target).value)"
+        class="px-3 py-2 text-xs font-semibold text-[#191C1B] bg-[#F8FAF8] border border-slate-200 rounded-lg focus:outline-none focus:border-[#006D2F]">
+        <option value="">Status: Todos</option>
+        <option value="ATIVO">Ativos</option>
+        <option value="INATIVO">Inativos</option>
+      </select>
+    </div>
+  </div>
 
-        <ng-container matColumnDef="situacao">
-          <th mat-header-cell *matHeaderCellDef>Situação</th>
-          <td mat-cell *matCellDef="let cliente">
-            <span class="selo" [class.neutro]="!cliente.ativo">{{ cliente.ativo ? 'Ativo' : 'Inativo' }}</span>
-          </td>
-        </ng-container>
+  @if (erro()) {
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">error</span>
+      <span>{{ erro() }}</span>
+    </div>
+  }
 
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let cliente" class="acoes">
-            <a mat-icon-button [routerLink]="['/admin/clientes/editar', cliente.id]" aria-label="Editar">
-              <mat-icon>edit</mat-icon>
-            </a>
-            <button mat-icon-button (click)="excluir(cliente)" aria-label="Excluir">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
-            {{ carregando() ? 'Carregando...' : 'Nenhum cliente encontrado.' }}
-          </td>
-        </tr>
+  <!-- Clients Data Table -->
+  <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-[#40493E] uppercase tracking-wider">
+            <th class="py-3.5 px-4">Cliente & E-mail</th>
+            <th class="py-3.5 px-4">CPF</th>
+            <th class="py-3.5 px-4">Telefone Principal</th>
+            <th class="py-3.5 px-4">Cidade / UF & Região</th>
+            <th class="py-3.5 px-4 text-center">Status</th>
+            <th class="py-3.5 px-4 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-xs">
+          @for (cliente of clientesFiltrados(); track cliente.id) {
+            <tr
+              class="hover:bg-slate-50/90 transition-colors cursor-pointer"
+              [class.bg-[#2E7D32]/5]="editandoId() === cliente.id && drawerAberto()"
+              (click)="abrirEdicaoDrawer(cliente)">
+              <td class="py-3.5 px-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#2E7D32]/15 text-[#006D2F] font-headline font-extrabold text-xs flex items-center justify-center shrink-0">
+                    {{ iniciaisCliente(cliente.nome) }}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <p class="font-bold text-[#191C1B] text-sm">{{ cliente.nome }}</p>
+                      <span class="text-[10px] font-mono text-[#40493E] bg-slate-100 px-1.5 py-0.5 rounded">
+                        #CLI-{{ cliente.id.toString().padStart(3, '0') }}
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-[#40493E]">{{ cliente.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-[#191C1B]">
+                {{ cliente.cpf | formato: 'cpf' }}
+              </td>
+              <td class="py-3.5 px-4">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-mono font-semibold text-[#191C1B]">
+                    {{ telefonePrincipal(cliente) | formato: 'telefone' }}
+                  </span>
+                  @if (temWhatsappPrincipal(cliente)) {
+                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Whats
+                    </span>
+                  }
+                  @if (cliente.telefones.length > 1) {
+                    <span class="text-[10px] font-bold text-[#00695C] bg-[#00695C]/10 px-1.5 py-0.5 rounded">
+                      +{{ cliente.telefones.length - 1 }}
+                    </span>
+                  }
+                </div>
+              </td>
+              <td class="py-3.5 px-4">
+                <p class="font-bold text-[#191C1B]">
+                  {{ cliente.endereco.municipio.nome }} / {{ cliente.endereco.municipio.estado.sigla }}
+                </p>
+                <p class="text-[11px] text-[#40493E]">
+                  Região {{ cliente.endereco.municipio.estado.regiao.nome }}
+                  @if (cliente.endereco.municipio.codigoIbge) {
+                    · IBGE {{ cliente.endereco.municipio.codigoIbge }}
+                  }
+                </p>
+              </td>
+              <td class="py-3.5 px-4 text-center">
+                @if (cliente.ativo) {
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Ativo
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                    Inativo
+                  </span>
+                }
+              </td>
+              <td class="py-3.5 px-4 text-right" (click)="$event.stopPropagation()">
+                <div class="inline-flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    (click)="abrirEdicaoDrawer(cliente)"
+                    class="p-1.5 rounded-lg text-[#006D2F] hover:bg-[#2E7D32]/10 transition-colors cursor-pointer"
+                    title="Editar no Drawer Lateral">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                  </button>
+                  <a
+                    [routerLink]="['/admin/clientes/editar', cliente.id]"
+                    class="p-1.5 rounded-lg text-slate-500 hover:text-[#191C1B] hover:bg-slate-100 transition-colors"
+                    title="Abrir tela dedicada de edição">
+                    <span class="material-symbols-outlined text-base">open_in_new</span>
+                  </a>
+                  <button
+                    type="button"
+                    (click)="excluir(cliente)"
+                    class="p-1.5 rounded-lg text-slate-500 hover:text-[#BA1A1A] hover:bg-red-50 transition-colors cursor-pointer"
+                    title="Excluir Cliente">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="py-10 text-center text-xs text-[#40493E]">
+                {{ carregando() ? 'Carregando clientes...' : 'Nenhum cliente encontrado.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
       </table>
     </div>
 
-    <mat-paginator
-      [length]="totalItems()"
-      [pageIndex]="pageIndex()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="mudarPagina($event)"
-    />
+    <!-- Pagination Footer -->
+    <div class="px-4 py-2 border-t border-slate-100 bg-[#F8FAF8]/60">
+      <mat-paginator
+        [length]="totalItems()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 25]"
+        (page)="mudarPagina($event)"
+        showFirstLastButtons />
+    </div>
   </div>
-</section>
+</div>
+
+<!-- SLIDE-OVER LATERAL DRAWER: CADASTRO / EDIÇÃO DE CLIENTE -->
+@if (drawerAberto()) {
+  <div class="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-[2px]">
+    <div class="w-full max-w-2xl bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col overflow-hidden">
+      <!-- Drawer Header -->
+      <div class="px-6 py-4 bg-[#111412] text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[#2E7D32] flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-xl">{{ editandoId() ? 'manage_accounts' : 'person_add' }}</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-headline text-base font-bold">
+                {{ editandoId() ? 'Editar Cliente' : 'Novo Cliente' }}
+              </h2>
+              @if (editandoId()) {
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#2E7D32]/30 text-[#6FE68C]">
+                  #CLI-{{ editandoId()!.toString().padStart(3, '0') }}
+                </span>
+              }
+            </div>
+            <p class="text-xs text-slate-400">
+              Formulário Reativo (`ClienteForm`) · Integração automática ViaCEP + `FormArray` de Telefones
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="fecharDrawer()"
+          class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Scrollable Body -->
+      <form [formGroup]="form" (ngSubmit)="salvarDrawer()" class="flex-1 overflow-y-auto p-6 space-y-6">
+        @if (erroFormulario()) {
+          <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">error</span>
+            <span>{{ erroFormulario() }}</span>
+          </div>
+        }
+
+        <!-- Section 1: Dados Pessoais -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <h3 class="font-headline text-xs font-extrabold text-[#191C1B] uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-[#006D2F]">badge</span>
+              1. Dados Pessoais & Identificação
+            </h3>
+            <span class="text-[11px] text-[#40493E]">Idade mínima: {{ idadeMinima }} anos</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Nome Completo <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="nome"
+                maxlength="120"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+              @if (form.controls.nome.touched && form.controls.nome.invalid) {
+                <p class="text-[11px] text-[#BA1A1A] mt-1">{{ mensagemErro('nome') }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                CPF (11 dígitos) <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="text"
+                formControlName="cpf"
+                (blur)="formatarCpfInput()"
+                placeholder="000.000.000-00"
+                class="w-full px-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+              @if (form.controls.cpf.touched && form.controls.cpf.invalid) {
+                <p class="text-[11px] text-[#BA1A1A] mt-1">{{ mensagemErro('cpf') }}</p>
+              } @else {
+                <p class="text-[10px] text-[#006D2F] font-medium mt-1">Dígitos verificadores validados (`cpf` único)</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                E-mail <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="email"
+                formControlName="email"
+                maxlength="120"
+                class="w-full px-3 py-2 text-xs font-medium text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+              @if (form.controls.email.touched && form.controls.email.invalid) {
+                <p class="text-[11px] text-[#BA1A1A] mt-1">{{ mensagemErro('email') }}</p>
+              } @else {
+                <p class="text-[10px] text-[#40493E] mt-1">E-mail único por cliente</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">
+                Data de Nascimento <span class="text-[#BA1A1A]">*</span>
+              </label>
+              <input
+                type="date"
+                formControlName="dataNascimento"
+                class="w-full px-3 py-2 text-xs font-mono font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+              @if (form.controls.dataNascimento.touched && form.controls.dataNascimento.invalid) {
+                <p class="text-[11px] text-[#BA1A1A] mt-1">{{ mensagemErro('dataNascimento') }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Gênero (Opcional)</label>
+              <select
+                formControlName="genero"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]">
+                <option value="">Não informado</option>
+                @for (g of generos; track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Telefones (FormArray 1..* Composition) -->
+        <div class="space-y-3" formArrayName="telefones">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div>
+              <h3 class="font-headline text-xs font-extrabold text-[#191C1B] uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-[#006D2F]">call</span>
+                2. Telefones de Contato (`FormArray` · 1..*)
+              </h3>
+              <p class="text-[11px] text-[#40493E]">Composição 1..*: ao menos um telefone válido é obrigatório.</p>
+            </div>
+            <button
+              type="button"
+              (click)="adicionarTelefone()"
+              class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-[#006D2F] bg-[#2E7D32]/10 hover:bg-[#2E7D32]/20 transition-colors cursor-pointer">
+              <span class="material-symbols-outlined text-sm">add</span>
+              Adicionar Telefone
+            </button>
+          </div>
+
+          @for (grupo of telefones.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="p-3 rounded-xl bg-[#F8FAF8] border border-slate-200/80 flex flex-wrap items-center gap-3">
+              <div class="w-20">
+                <label class="block text-[10px] font-bold text-[#40493E] uppercase mb-1">DDD *</label>
+                <input
+                  type="text"
+                  formControlName="codigoArea"
+                  maxlength="2"
+                  placeholder="11"
+                  class="w-full px-2.5 py-1.5 text-xs font-mono font-bold text-center text-[#191C1B] bg-white border border-slate-300 rounded-lg" />
+              </div>
+              <div class="flex-1 min-w-[140px]">
+                <label class="block text-[10px] font-bold text-[#40493E] uppercase mb-1">Número (8 ou 9 dígitos) *</label>
+                <input
+                  type="text"
+                  formControlName="numero"
+                  (blur)="formatarNumero(i)"
+                  placeholder="99999-0000"
+                  class="w-full px-3 py-1.5 text-xs font-mono font-bold text-[#191C1B] bg-white border border-slate-300 rounded-lg" />
+              </div>
+              <div class="pt-4">
+                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#191C1B] cursor-pointer">
+                  <input type="checkbox" formControlName="whatsapp" class="rounded text-[#2E7D32] focus:ring-[#2E7D32]" />
+                  <span>WhatsApp</span>
+                </label>
+              </div>
+              <div class="pt-4">
+                <button
+                  type="button"
+                  (click)="removerTelefone(i)"
+                  [disabled]="telefones.length === 1"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-[#BA1A1A] hover:bg-red-50 transition-colors disabled:opacity-30 cursor-pointer"
+                  title="Remover Telefone">
+                  <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Section 3: Endereço & Integração ViaCEP -->
+        <div class="space-y-4" [formGroup]="endereco">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div>
+              <h3 class="font-headline text-xs font-extrabold text-[#191C1B] uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-[#00695C]">location_on</span>
+                3. Endereço Estruturado & Integração ViaCEP
+              </h3>
+              <p class="text-[11px] text-[#40493E]">Hierarquia `Endereco → Municipio → Estado → Regiao` sincronizada pelo CEP.</p>
+            </div>
+            @if (enderecoPeloCep()) {
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00695C]/10 text-[#00695C]">ViaCEP Conectado</span>
+            }
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <!-- CEP + Botão Buscar -->
+            <div class="sm:col-span-5">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">CEP (8 dígitos) <span class="text-[#BA1A1A]">*</span></label>
+              <div class="flex gap-1.5">
+                <input
+                  type="text"
+                  formControlName="cep"
+                  (blur)="buscarCep()"
+                  placeholder="00000-000"
+                  class="w-full px-3 py-2 text-xs font-mono font-bold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+                <button
+                  type="button"
+                  (click)="buscarCep(true)"
+                  [disabled]="buscandoCep()"
+                  class="px-3 py-2 rounded-lg bg-[#2E7D32] text-white text-xs font-bold hover:bg-[#006D2F] transition-colors flex items-center gap-1 shrink-0 cursor-pointer">
+                  <span class="material-symbols-outlined text-sm">travel_explore</span>
+                  {{ buscandoCep() ? '...' : 'CEP' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Logradouro -->
+            <div class="sm:col-span-7">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Logradouro <span class="text-[#BA1A1A]">*</span></label>
+              <input
+                type="text"
+                formControlName="logradouro"
+                maxlength="120"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+
+            @if (avisoCep()) {
+              <div class="sm:col-span-12 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">warning</span>
+                <span>{{ avisoCep() }}</span>
+              </div>
+            }
+            @if (falhaRedeCep()) {
+              <div class="sm:col-span-12 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between gap-2">
+                <span>Não foi possível consultar o ViaCEP. Preencha o endereço manualmente.</span>
+                <button type="button" (click)="buscarCep(true)" class="font-bold underline cursor-pointer">Tentar novamente</button>
+              </div>
+            }
+
+            <!-- Número -->
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Número <span class="text-[#BA1A1A]">*</span></label>
+              <input
+                type="text"
+                formControlName="numero"
+                maxlength="10"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+
+            <!-- Complemento -->
+            <div class="sm:col-span-4">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Complemento</label>
+              <input
+                type="text"
+                formControlName="complemento"
+                maxlength="60"
+                class="w-full px-3 py-2 text-xs font-medium text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+
+            <!-- Bairro -->
+            <div class="sm:col-span-5">
+              <label class="block text-xs font-bold text-[#191C1B] mb-1">Bairro <span class="text-[#BA1A1A]">*</span></label>
+              <input
+                type="text"
+                formControlName="bairro"
+                maxlength="80"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#191C1B] bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#006D2F]" />
+            </div>
+
+            <!-- Cidade (Travada pelo ViaCEP quando codigoIbge presente) -->
+            <div class="sm:col-span-6">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-bold text-[#191C1B]">Município (`cidade`) <span class="text-[#BA1A1A]">*</span></label>
+                @if (endereco.controls.codigoIbge.value) {
+                  <span class="text-[10px] font-mono text-[#00695C] font-semibold">IBGE: {{ endereco.controls.codigoIbge.value }}</span>
+                }
+              </div>
+              <input
+                type="text"
+                formControlName="cidade"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#40493E] bg-slate-100 border border-slate-200 rounded-lg" />
+            </div>
+
+            <!-- UF (Travada pelo ViaCEP) -->
+            <div class="sm:col-span-6">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-bold text-[#191C1B]">Estado (`uf`) <span class="text-[#BA1A1A]">*</span></label>
+                @if (enderecoPeloCep()) {
+                  <button
+                    type="button"
+                    (click)="liberarCidadeUf()"
+                    class="text-[10px] font-bold text-[#006D2F] hover:underline cursor-pointer">
+                    Editar cidade/UF manualmente
+                  </button>
+                }
+              </div>
+              <select
+                formControlName="uf"
+                class="w-full px-3 py-2 text-xs font-semibold text-[#40493E] bg-slate-100 border border-slate-200 rounded-lg">
+                <option value="">Selecione...</option>
+                @for (est of estados(); track est.id) {
+                  <option [value]="est.sigla">{{ est.sigla }} - {{ est.nome }} ({{ est.regiao.nome }})</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Preferências e Situação -->
+        <div class="p-3.5 rounded-xl bg-[#F8FAF8] border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <p class="text-xs font-bold text-[#191C1B]">Cliente Ativo (`ativo`)</p>
+              <p class="text-[11px] text-[#40493E]">Habilitado para compras na loja</p>
+            </div>
+            <input type="checkbox" formControlName="ativo" class="w-4 h-4 rounded text-[#2E7D32] focus:ring-[#2E7D32]" />
+          </label>
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <p class="text-xs font-bold text-[#191C1B]">Receber Novidades (`aceitaNovidades`)</p>
+              <p class="text-[11px] text-[#40493E]">Opt-in para ofertas e lançamentos</p>
+            </div>
+            <input type="checkbox" formControlName="aceitaNovidades" class="w-4 h-4 rounded text-[#2E7D32] focus:ring-[#2E7D32]" />
+          </label>
+        </div>
+
+        <!-- Drawer Footer Actions -->
+        <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            (click)="fecharDrawer()"
+            class="px-4 py-2 rounded-lg text-xs font-bold text-[#40493E] bg-white border border-slate-300 hover:bg-slate-100 transition-colors cursor-pointer">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="salvando()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold text-white bg-[#2E7D32] hover:bg-[#006D2F] transition-all shadow-xs disabled:opacity-50 cursor-pointer">
+            <span class="material-symbols-outlined text-base">save</span>
+            {{ salvando() ? 'Salvando...' : 'Salvar Cadastro do Cliente' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -14,7 +14,7 @@ import { SessaoService } from '../../../services/sessao.service';
 })
 export class Carrinho {
   carrinho = inject(CarrinhoService);
-  private sessao = inject(SessaoService);
+  sessao = inject(SessaoService);
   private router = inject(Router);
 
   readonly freteGratisAPartir = FRETE_GRATIS_A_PARTIR;
@@ -25,6 +25,13 @@ export class Carrinho {
 
   progressoFrete(): number {
     return Math.min((this.carrinho.subtotal() / FRETE_GRATIS_A_PARTIR) * 100, 100);
+  }
+
+  pesoTotalKg(): string {
+    const gramas = this.carrinho
+      .itens()
+      .reduce((soma, item) => soma + item.produto.pesoGramas * item.quantidade, 0);
+    return (gramas / 1000).toFixed(2).replace('.', ',');
   }
 
   alterar(item: ItemCarrinho, delta: number): void {

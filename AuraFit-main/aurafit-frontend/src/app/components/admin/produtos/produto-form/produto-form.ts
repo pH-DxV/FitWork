@@ -1,3 +1,4 @@
+import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -27,8 +28,15 @@ import { Validadores } from '../../../../shared/validadores';
 @Component({
   selector: 'app-produto-form',
   imports: [
-    ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule,
-    MatIconModule, MatSlideToggleModule,
+    CurrencyPipe,
+    ReactiveFormsModule,
+    RouterLink,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './produto-form.html',
 })
@@ -57,12 +65,23 @@ export class ProdutoForm implements OnInit {
 
   form = this.fb.group({
     nome: this.fb.nonNullable.control('', [
-      Validators.required, Validators.minLength(2), Validators.maxLength(120), Validadores.naoSomenteEspacos,
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(120),
+      Validadores.naoSomenteEspacos,
     ]),
     descricao: this.fb.nonNullable.control('', Validators.maxLength(1000)),
     preco: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.01), Validadores.preco]),
-    pesoGramas: this.fb.control<number | null>(null, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]),
-    estoque: this.fb.control<number | null>(null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]),
+    pesoGramas: this.fb.control<number | null>(null, [
+      Validators.required,
+      Validators.min(1),
+      Validators.pattern(/^\d+$/),
+    ]),
+    estoque: this.fb.control<number | null>(null, [
+      Validators.required,
+      Validators.min(0),
+      Validators.pattern(/^\d+$/),
+    ]),
     idTipoProteina: this.fb.control<number | null>(null, Validators.required),
     idCategoria: this.fb.control<number | null>(null, Validators.required),
     idMarca: this.fb.control<number | null>(null, Validators.required),
@@ -119,6 +138,41 @@ export class ProdutoForm implements OnInit {
         this.carregando.set(false);
       },
     });
+  }
+
+  alternarSaborChip(idSabor: number): void {
+    const atuais = this.form.controls.idsSabores.value;
+    if (atuais.includes(idSabor)) {
+      this.form.controls.idsSabores.setValue(atuais.filter((id) => id !== idSabor));
+    } else {
+      this.form.controls.idsSabores.setValue([...atuais, idSabor]);
+    }
+  }
+
+  saborSelecionado(idSabor: number): boolean {
+    return this.form.controls.idsSabores.value.includes(idSabor);
+  }
+
+  nomeTipoSelecionado(): string {
+    const id = this.form.controls.idTipoProteina.value;
+    return this.tipos().find((t) => t.id === id)?.nome ?? 'Tipo de Proteína';
+  }
+
+  nomeCategoriaSelecionada(): string {
+    const id = this.form.controls.idCategoria.value;
+    return this.categorias().find((c) => c.id === id)?.nome ?? 'Categoria';
+  }
+
+  nomeMarcaSelecionada(): string {
+    const id = this.form.controls.idMarca.value;
+    return this.marcas().find((m) => m.id === id)?.nome ?? 'Marca Homologada';
+  }
+
+  saboresSelecionadosNomes(): string[] {
+    const ids = this.form.controls.idsSabores.value;
+    return this.sabores()
+      .filter((s) => ids.includes(s.id))
+      .map((s) => s.nome);
   }
 
   salvar(): void {

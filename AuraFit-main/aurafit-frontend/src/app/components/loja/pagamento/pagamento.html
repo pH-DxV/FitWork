@@ -1,137 +1,831 @@
-<section class="pagina">
-  @if (pedidoConcluido(); as numero) {
-    <div class="cartao sucesso">
-      <mat-icon>task_alt</mat-icon>
-      <h1>Pedido {{ numero }} realizado!</h1>
-      <p>Total de {{ totalPago() | currency: 'BRL' }}. Você receberá as instruções de pagamento por e-mail.</p>
-      <div class="botoes-sucesso">
-        <a mat-flat-button routerLink="/loja/perfil">Ver meus pedidos</a>
-        <a mat-stroked-button routerLink="/loja">Voltar à loja</a>
+<div class="max-w-[1440px] mx-auto px-space-md md:px-space-xl py-space-lg flex flex-col gap-space-xl">
+  @if (pedidoConcluido(); as numeroPedido) {
+    <!-- =====================================================================
+         TELA 03 DO STITCH: CONFIRMAÇÃO DO PEDIDO B2B & RASTREABILIDADE FISCAL
+         ===================================================================== -->
+
+    <!-- Banner Superior de Notificação -->
+    <div class="p-4 rounded-xl bg-[#dcfce7] border border-[#15803d]/30 text-[#14532d] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-[22px] text-[#15803d]">check_circle</span>
+        <span class="font-title-sm text-title-sm font-bold">
+          Lote reservado no CD-01 São Paulo · Pré-DANFE, XML e Documentos de Cobrança emitidos com sucesso!
+        </span>
       </div>
+      <span class="font-mono text-label-sm font-bold px-2.5 py-1 rounded bg-white/80 text-[#14532d]">
+        PROTOCOLO SEFAZ #{{ numeroPedido }}
+      </span>
     </div>
-  } @else {
-    <header class="topo-pagina">
-      <div>
-        <h1>Pagamento</h1>
-        <p class="subtitulo">Endereço de entrega e forma de pagamento.</p>
+
+    <!-- Stepper 4 Etapas Concluídas -->
+    <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        @for (etapa of ['1. Carrinho B2B', '2. Fiscal & Entrega', '3. Faturamento', '4. Confirmação']; track etapa) {
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-[#dcfce7]/70 border border-[#15803d]/30">
+            <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[18px]">check</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Concluído</span>
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">{{ etapa }}</span>
+            </div>
+          </div>
+        }
       </div>
-      <a mat-button routerLink="/loja/carrinho"><mat-icon>arrow_back</mat-icon> Voltar ao carrinho</a>
-    </header>
+    </section>
 
-    <div class="layout">
-      <form class="cartao" [formGroup]="form" (ngSubmit)="confirmar()">
-        <div class="formulario">
-          <h2>1. Endereço de entrega</h2>
+    <!-- HERO CARD DE SUCESSO -->
+    <section class="rounded-2xl bg-gradient-to-br from-[#00210a] via-[#121e16] to-[#005323] text-white p-space-lg md:p-10 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+      <div class="flex items-start gap-5">
+        <div class="w-16 h-16 rounded-2xl bg-[#15803d] border border-[#95f8a7]/40 flex items-center justify-center text-[#95f8a7] shrink-0 shadow-lg">
+          <span class="material-symbols-outlined text-[36px]">verified</span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-[#79db8d]/20 text-[#95f8a7] font-label-sm text-label-sm uppercase tracking-wider font-bold">
+              PEDIDO FATURADO &amp; LOTE RESERVADO
+            </span>
+            <span class="font-mono text-body-sm text-white/75">Emissão: {{ dataEmissao() }}</span>
+          </div>
+          <h1 class="font-headline-lg text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            Pedido Corporativo <span class="text-[#95f8a7]">#{{ numeroPedido }}</span> confirmado!
+          </h1>
+          <p class="font-body-md text-body-md text-white/80 max-w-2xl">
+            Enviamos a cópia da DANFE, arquivo XML e os Laudos Cromatográficos HPLC dos lotes reservados para
+            <strong class="text-white">{{ sessao.usuario() }}</strong>.
+          </p>
+        </div>
+      </div>
 
-          <mat-form-field appearance="outline" class="c2">
-            <mat-label>CEP</mat-label>
-            <input matInput formControlName="cep" placeholder="77001-002" maxlength="9" (blur)="buscarCep()" />
-            <mat-hint>{{ buscandoCep() ? 'Consultando CEP...' : avisoCep() }}</mat-hint>
-            <mat-error>{{ mensagemErro('cep') }}</mat-error>
-          </mat-form-field>
-          <span class="c2"></span>
+      <div class="flex flex-wrap items-center gap-3 shrink-0">
+        <button
+          type="button"
+          (click)="imprimirPedido()"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-title-sm text-title-sm transition-all cursor-pointer"
+        >
+          <span class="material-symbols-outlined text-[18px]">print</span>
+          <span>Imprimir Espelho</span>
+        </button>
+        <a
+          routerLink="/loja/perfil"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-title-sm text-title-sm transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+          <span>Meus Pedidos</span>
+        </a>
+        <a
+          routerLink="/loja"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#15803d] hover:bg-[#00652c] text-white font-title-sm text-title-sm font-bold shadow-md transition-all"
+        >
+          <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+          <span>Novo Pedido B2B</span>
+        </a>
+      </div>
+    </section>
 
-          <mat-form-field appearance="outline" class="c3">
-            <mat-label>Logradouro</mat-label>
-            <input matInput formControlName="logradouro" />
-            <mat-error>{{ mensagemErro('logradouro') }}</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="c1">
-            <mat-label>Número</mat-label>
-            <input matInput formControlName="numero" />
-            <mat-error>{{ mensagemErro('numero') }}</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="c2">
-            <mat-label>Complemento</mat-label>
-            <input matInput formControlName="complemento" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="c2">
-            <mat-label>Bairro</mat-label>
-            <input matInput formControlName="bairro" />
-            <mat-error>{{ mensagemErro('bairro') }}</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="c3">
-            <mat-label>Cidade</mat-label>
-            <input matInput formControlName="cidade" />
-            <mat-error>{{ mensagemErro('cidade') }}</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="c1">
-            <mat-label>UF</mat-label>
-            <input matInput formControlName="uf" maxlength="2" />
-            <mat-error>{{ mensagemErro('uf') }}</mat-error>
-          </mat-form-field>
+    <!-- LAYOUT 2 COLUNAS DA CONFIRMAÇÃO (8 cols / 4 cols) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+      <!-- COLUNA ESQUERDA (8 cols): Documentos Fiscais, Itens e Stepper Logístico -->
+      <div class="lg:col-span-8 flex flex-col gap-space-lg">
+        <!-- 3 CARDS DE DOCUMENTOS FISCAIS E FINANCEIROS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+          <!-- Card 1: Financeiro / Pagamento -->
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col justify-between gap-4">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  1. Faturamento
+                </span>
+                <span class="material-symbols-outlined text-primary text-[22px]">payments</span>
+              </div>
+              <h3 class="font-title-md text-title-md text-on-surface font-bold">
+                {{ form.controls.forma.value === 'pix' ? 'PIX Corporativo (5% OFF)' : form.controls.forma.value === 'cartao' ? 'Cartão de Crédito' : 'Boleto Bancário B2B' }}
+              </h3>
+              <p class="font-mono text-[11px] text-on-surface-variant bg-surface-container-low p-2 rounded-lg break-all">
+                {{ codigoBarrasBoleto }}
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="copiarTexto(codigoBarrasBoleto, 'Código de pagamento')"
+                class="flex-1 h-9 px-3 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                <span>Copiar Código</span>
+              </button>
+              <button
+                type="button"
+                (click)="baixarDocumentoSimulado('Boleto_' + numeroPedido + '.pdf')"
+                class="h-9 px-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface flex items-center justify-center cursor-pointer"
+                title="Baixar PDF"
+              >
+                <span class="material-symbols-outlined text-[18px]">download</span>
+              </button>
+            </div>
+          </div>
 
-          <h2>2. Forma de pagamento</h2>
+          <!-- Card 2: Nota Fiscal Eletrônica (DANFE & XML) -->
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col justify-between gap-4">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  2. Documento Fiscal
+                </span>
+                <span class="material-symbols-outlined text-primary text-[22px]">description</span>
+              </div>
+              <h3 class="font-title-md text-title-md text-on-surface font-bold">
+                DANFE &amp; XML SEFAZ
+              </h3>
+              <p class="font-mono text-[11px] text-on-surface-variant bg-surface-container-low p-2 rounded-lg break-all">
+                {{ chaveAcessoNfe }}
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="copiarTexto(chaveAcessoNfe, 'Chave de acesso NF-e')"
+                class="flex-1 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                <span>Copiar Chave</span>
+              </button>
+              <button
+                type="button"
+                (click)="baixarDocumentoSimulado('DANFE_' + numeroPedido + '.pdf')"
+                class="h-9 px-2.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center cursor-pointer"
+                title="Baixar DANFE"
+              >
+                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              </button>
+            </div>
+          </div>
 
-          <mat-radio-group formControlName="forma" class="formas c4">
-            <mat-radio-button value="pix"><mat-icon>qr_code_2</mat-icon> Pix (5% de desconto)</mat-radio-button>
-            <mat-radio-button value="cartao"><mat-icon>credit_card</mat-icon> Cartão de crédito</mat-radio-button>
-            <mat-radio-button value="boleto"><mat-icon>receipt_long</mat-icon> Boleto</mat-radio-button>
-          </mat-radio-group>
-
-          @if (form.controls.forma.value === 'cartao') {
-            <mat-form-field appearance="outline" class="c4">
-              <mat-label>Número do cartão</mat-label>
-              <input matInput formControlName="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="19" />
-              <mat-error>{{ mensagemErro('numeroCartao') }}</mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="c4">
-              <mat-label>Nome impresso no cartão</mat-label>
-              <input matInput formControlName="nomeCartao" />
-              <mat-error>{{ mensagemErro('nomeCartao') }}</mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="c1">
-              <mat-label>Validade</mat-label>
-              <input matInput formControlName="validade" placeholder="MM/AA" maxlength="5" />
-              <mat-error>{{ mensagemErro('validade') }}</mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="c1">
-              <mat-label>CVV</mat-label>
-              <input matInput formControlName="cvv" maxlength="4" />
-              <mat-error>{{ mensagemErro('cvv') }}</mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="c2">
-              <mat-label>Parcelas</mat-label>
-              <mat-select formControlName="parcelas">
-                @for (n of parcelas(); track n) {
-                  <mat-option [value]="n">{{ n }}x de {{ carrinho.total() / n | currency: 'BRL' }} sem juros</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          }
-
-          @if (form.controls.forma.value === 'pix') {
-            <p class="c4 info-pagamento"><mat-icon>info</mat-icon> O QR Code do Pix é exibido após a confirmação.</p>
-          }
-          @if (form.controls.forma.value === 'boleto') {
-            <p class="c4 info-pagamento"><mat-icon>info</mat-icon> O boleto vence em 3 dias úteis.</p>
-          }
-
-          <div class="botoes">
-            <button mat-flat-button type="submit" [disabled]="carrinho.itens().length === 0">
-              <mat-icon>lock</mat-icon>
-              Confirmar pedido
+          <!-- Card 3: Laudos Cromatográficos HPLC -->
+          <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col justify-between gap-4">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  3. Compliance ANVISA
+                </span>
+                <span class="material-symbols-outlined text-primary text-[22px]">biotech</span>
+              </div>
+              <h3 class="font-title-md text-title-md text-on-surface font-bold">
+                Laudos Técnicos HPLC
+              </h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Certificados analíticos de pureza proteica e microbiologia dos lotes faturados.
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="baixarDocumentoSimulado('Laudos_HPLC_' + numeroPedido + '.zip')"
+              class="w-full h-9 px-3 rounded-lg bg-[#dcfce7] hover:bg-[#bbf7d0] text-[#14532d] font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-[18px]">folder_zip</span>
+              <span>Baixar Pacote de Laudos (.ZIP)</span>
             </button>
           </div>
         </div>
-      </form>
 
-      <aside class="cartao resumo">
-        <h2>Resumo</h2>
-        @for (item of carrinho.itens(); track $index) {
-          <div class="linha">
-            <span>{{ item.quantidade }}x {{ item.produto.nome }}</span>
-            <span>{{ item.produto.preco * item.quantidade | currency: 'BRL' }}</span>
+        <!-- TABELA DE PRODUTOS FATURADOS -->
+        <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden">
+          <div class="p-space-lg border-b border-outline-variant/20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary-container text-[22px]">inventory_2</span>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                Espelho de SKUs Faturados no Pedido
+              </h2>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-bold">
+              {{ itensFaturados().length }} {{ itensFaturados().length === 1 ? 'SKU' : 'SKUs' }}
+            </span>
           </div>
-        } @empty {
-          <p>Seu carrinho está vazio.</p>
-        }
-        <div class="linha"><span>Frete</span><span>{{ carrinho.frete() === 0 ? 'Grátis' : (carrinho.frete() | currency: 'BRL') }}</span></div>
-        @if (descontoPix() > 0) {
-          <div class="linha"><span>Desconto Pix (5%)</span><span>- {{ descontoPix() | currency: 'BRL' }}</span></div>
-        }
-        <div class="linha total"><span>Total</span><span>{{ totalFinal() | currency: 'BRL' }}</span></div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase">
+                  <th class="py-3 px-space-md">Produto / Sabor</th>
+                  <th class="py-3 px-space-md">Lote Reservado</th>
+                  <th class="py-3 px-space-md text-center">Qtd</th>
+                  <th class="py-3 px-space-md text-right">Unitário</th>
+                  <th class="py-3 px-space-md text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/20 font-body-md text-body-md">
+                @for (item of itensFaturados(); track item.produto.id + '-' + (item.sabor ?? '')) {
+                  <tr>
+                    <td class="py-3.5 px-space-md">
+                      <div class="flex flex-col">
+                        <span class="font-title-sm text-title-sm text-on-surface font-bold">{{ item.produto.nome }}</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">
+                          {{ item.produto.marca.nome }} · {{ item.sabor || 'Fórmula Neutra' }} · {{ item.produto.pesoGramas }}g
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-3.5 px-space-md font-mono text-body-sm text-primary font-semibold">
+                      #LT-AF-{{ 24000 + item.produto.id }}
+                    </td>
+                    <td class="py-3.5 px-space-md text-center font-title-sm text-title-sm font-bold">
+                      {{ item.quantidade }} un
+                    </td>
+                    <td class="py-3.5 px-space-md text-right text-on-surface-variant">
+                      {{ item.produto.preco | currency: 'BRL' }}
+                    </td>
+                    <td class="py-3.5 px-space-md text-right font-title-sm text-title-sm font-bold text-on-surface">
+                      {{ item.produto.preco * item.quantidade | currency: 'BRL' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- STEPPER VERTICAL DE EXPEDIÇÃO E LOGÍSTICA -->
+        <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary-container text-[22px]">local_shipping</span>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                Rastreamento de Expedição &amp; SLA Logístico
+              </h2>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+              {{ modalidadeLogistica() === 'gollog' ? 'Aéreo Gollog Express' : 'Rodonaves Climatizado' }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+            <div class="p-3.5 rounded-xl bg-[#dcfce7]/50 border border-[#15803d]/30 flex flex-col gap-1">
+              <span class="font-label-sm text-label-sm text-[#14532d] uppercase">1. Reserva FEFO</span>
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">Lote Alocado</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Concluído no CD-01 SP</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[#dcfce7]/50 border border-[#15803d]/30 flex flex-col gap-1">
+              <span class="font-label-sm text-label-sm text-[#14532d] uppercase">2. SEFAZ / NF-e</span>
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">Pré-Nota Autorizada</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Validação fiscal 100%</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col gap-1">
+              <span class="font-label-sm text-label-sm text-primary uppercase">3. Picking WMS</span>
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">Separação Térmica</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Em fila de paletização</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col gap-1">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">4. Transporte</span>
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">Entrega no Destino</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                {{ form.controls.cidade.value }} / {{ form.controls.uf.value }}
+              </span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUNA DIREITA (4 cols): Resumo Consolidado & Gerente de Contas -->
+      <aside class="lg:col-span-4 flex flex-col gap-space-md">
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-sm flex flex-col gap-4">
+          <h3 class="font-title-lg text-title-lg text-on-surface font-bold border-b border-outline-variant/20 pb-3">
+            Resumo Financeiro Faturado
+          </h3>
+
+          <div class="flex flex-col gap-2.5 font-body-md text-body-md">
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Subtotal Mercadorias</span>
+              <strong class="text-on-surface">{{ subtotalFaturado() | currency: 'BRL' }}</strong>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Frete &amp; Seguro Carga</span>
+              <strong class="text-on-surface">
+                {{ freteFaturado() === 0 ? 'Bonificado (Grátis)' : (freteFaturado() | currency: 'BRL') }}
+              </strong>
+            </div>
+            @if (descontoFaturado() > 0) {
+              <div class="flex justify-between text-primary">
+                <span>Desconto PIX (5%)</span>
+                <strong>- {{ descontoFaturado() | currency: 'BRL' }}</strong>
+              </div>
+            }
+          </div>
+
+          <div class="pt-3 border-t border-outline-variant/30 flex items-baseline justify-between">
+            <span class="font-title-md text-title-md text-on-surface font-bold">Total Faturado</span>
+            <span class="font-headline-md text-headline-md text-primary font-extrabold">
+              {{ totalPago() | currency: 'BRL' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Gerente de Contas B2B (Carlos Eduardo - Stitch) -->
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-3">
+          <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">
+            Executivo de Contas Dedicado
+          </span>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-primary-container text-on-primary font-title-md font-bold flex items-center justify-center">
+              CE
+            </div>
+            <div class="flex flex-col">
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">Carlos Eduardo</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Gerente Key Account B2B</span>
+            </div>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            Precisa antecipar o embarque ou ajustar janelas de recebimento no seu depósito? Fale direto com nossa mesa operacional.
+          </p>
+          <a
+            href="https://wa.me/5511987654321"
+            target="_blank"
+            rel="noopener"
+            class="w-full h-10 rounded-xl bg-[#dcfce7] hover:bg-[#bbf7d0] text-[#14532d] font-title-sm text-title-sm font-bold flex items-center justify-center gap-2 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">chat</span>
+            <span>Atendimento WhatsApp B2B</span>
+          </a>
+        </div>
       </aside>
     </div>
+  } @else {
+    <!-- =====================================================================
+         TELA 02 DO STITCH: CHECKOUT B2B, ENDEREÇO VIACEP & FATURAMENTO
+         ===================================================================== -->
+
+    <!-- STEPPER DE PROGRESSO DO CHECKOUT B2B -->
+    <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <a
+          routerLink="/loja/carrinho"
+          class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"
+        >
+          <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[18px]">check</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Concluído</span>
+            <span class="font-title-sm text-title-sm text-on-surface font-bold">1. Carrinho &amp; Volume</span>
+          </div>
+        </a>
+
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-[#dcfce7]/70 border border-[#15803d]/30">
+          <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+            2
+          </div>
+          <div class="flex flex-col">
+            <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Em Preenchimento</span>
+            <span class="font-title-sm text-title-sm text-on-surface font-bold">2. Fiscal &amp; Entrega</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-[#dcfce7]/70 border border-[#15803d]/30">
+          <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+            3
+          </div>
+          <div class="flex flex-col">
+            <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Em Preenchimento</span>
+            <span class="font-title-sm text-title-sm text-on-surface font-bold">3. Faturamento</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low/60 text-on-surface-variant">
+          <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+            4
+          </div>
+          <div class="flex flex-col">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider">Próximo Passo</span>
+            <span class="font-title-sm text-title-sm font-semibold">4. Confirmação &amp; DANFE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CABEÇALHO DO CHECKOUT -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-2.5">
+          <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
+            Checkout B2B &amp; Emissão Fiscal
+          </h1>
+          <span class="px-3 py-1 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+            Ambiente Criptografado TLS 1.3
+          </span>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Informe o endereço de entrega validado via Correios/IBGE e selecione a modalidade de faturamento.
+        </p>
+      </div>
+      <a
+        routerLink="/loja/carrinho"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-title-sm text-title-sm self-start sm:self-auto"
+      >
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        <span>Voltar ao carrinho</span>
+      </a>
+    </div>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="confirmar()"
+      novalidate
+      class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start"
+    >
+      <!-- COLUNA ESQUERDA (8 cols): Endereço ViaCEP, Logística e Pagamento -->
+      <div class="lg:col-span-8 flex flex-col gap-space-lg">
+        <!-- SEÇÃO 1: REVISÃO RÁPIDA DE ITENS -->
+        @if (carrinho.itens().length > 0) {
+          <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-space-md">
+            <div class="flex items-center justify-between pb-space-xs border-b border-outline-variant/20">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold flex items-center justify-center">
+                  1
+                </span>
+                <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                  Itens para Reserva de Lote ({{ carrinho.quantidadeTotal() }} un)
+                </h2>
+              </div>
+              <a routerLink="/loja/carrinho" class="font-label-md text-label-md text-primary hover:underline">
+                Editar itens
+              </a>
+            </div>
+
+            <div class="divide-y divide-outline-variant/20">
+              @for (item of carrinho.itens(); track item.produto.id + '-' + (item.sabor ?? '')) {
+                <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-surface-container text-primary font-title-sm font-bold flex items-center justify-center shrink-0">
+                      {{ item.produto.marca.nome.slice(0, 2).toUpperCase() }}
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                      <span class="font-title-sm text-title-sm text-on-surface font-semibold truncate">
+                        {{ item.produto.nome }}
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">
+                        {{ item.produto.marca.nome }} · {{ item.sabor || 'Neutro' }} · {{ item.produto.pesoGramas }}g
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0">
+                    <div class="inline-flex items-center rounded-lg bg-surface-container-low border border-outline-variant/30 p-0.5">
+                      <button
+                        type="button"
+                        (click)="alterarQuantidadeItem(item, -1)"
+                        class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center cursor-pointer"
+                      >
+                        <span class="material-symbols-outlined text-[16px]">remove</span>
+                      </button>
+                      <span class="w-8 text-center font-title-sm text-title-sm font-bold">{{ item.quantidade }}</span>
+                      <button
+                        type="button"
+                        (click)="alterarQuantidadeItem(item, 1)"
+                        [disabled]="item.quantidade >= item.produto.estoque"
+                        class="w-7 h-7 rounded hover:bg-surface-container disabled:opacity-40 flex items-center justify-center cursor-pointer"
+                      >
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                      </button>
+                    </div>
+                    <strong class="font-title-sm text-title-sm text-on-surface min-w-[90px] text-right">
+                      {{ item.produto.preco * item.quantidade | currency: 'BRL' }}
+                    </strong>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- SEÇÃO 2: ENDEREÇO FISCAL & ENTREGA (INTEGRAÇÃO VIACEP) -->
+        <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-space-xs border-b border-outline-variant/20">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold flex items-center justify-center">
+                2
+              </span>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                Endereço de Entrega &amp; Validação ViaCEP
+              </h2>
+            </div>
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-semibold">
+              <span class="material-symbols-outlined text-[14px]">explore</span>
+              <span>Integração Correios / IBGE</span>
+            </span>
+          </div>
+
+          @if (avisoCep()) {
+            <div class="p-3 rounded-xl bg-[#fef3c7] text-[#b45309] font-body-sm text-body-sm flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">warning</span>
+              <span>{{ avisoCep() }}</span>
+            </div>
+          }
+
+          <div class="formulario">
+            <mat-form-field appearance="outline" class="c2">
+              <mat-label>CEP de Destino</mat-label>
+              <input matInput formControlName="cep" placeholder="00000-000" (blur)="buscarCep()" />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="buscarCep()"
+                [disabled]="buscandoCep()"
+                aria-label="Buscar CEP"
+              >
+                <mat-icon>search</mat-icon>
+              </button>
+              <mat-error>{{ mensagemErro('cep') }}</mat-error>
+            </mat-form-field>
+
+            <div class="c2 flex items-center pb-4">
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                Digite os 8 dígitos do CEP para preencher automaticamente logradouro, bairro, cidade e UF.
+              </span>
+            </div>
+
+            <mat-form-field appearance="outline" class="c3">
+              <mat-label>Logradouro / Avenida / Rua</mat-label>
+              <input matInput formControlName="logradouro" />
+              <mat-error>{{ mensagemErro('logradouro') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="c1">
+              <mat-label>Número</mat-label>
+              <input matInput formControlName="numero" />
+              <mat-error>{{ mensagemErro('numero') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="c2">
+              <mat-label>Complemento / Doca / Galpão</mat-label>
+              <input matInput formControlName="complemento" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="c2">
+              <mat-label>Bairro</mat-label>
+              <input matInput formControlName="bairro" />
+              <mat-error>{{ mensagemErro('bairro') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="c3">
+              <mat-label>Município</mat-label>
+              <input matInput formControlName="cidade" />
+              <mat-error>{{ mensagemErro('cidade') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="c1">
+              <mat-label>UF</mat-label>
+              <input matInput formControlName="uf" maxlength="2" />
+              <mat-error>{{ mensagemErro('uf') }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Modalidades de Transporte Climatizado (Stitch) -->
+          <div class="pt-2 border-t border-outline-variant/20 flex flex-col gap-2.5">
+            <span class="font-label-md text-label-md text-on-surface font-bold uppercase tracking-wider">
+              Modalidade de Transporte &amp; Cadeia Térmica
+            </span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                type="button"
+                (click)="selecionarLogistica('rodonaves')"
+                class="p-3.5 rounded-xl border text-left transition-all flex items-start justify-between gap-3 cursor-pointer"
+                [class]="
+                  modalidadeLogistica() === 'rodonaves'
+                    ? 'bg-[#dcfce7]/50 border-[#15803d] shadow-xs'
+                    : 'bg-surface-container-low/50 border-outline-variant/40 hover:bg-surface-container-low'
+                "
+              >
+                <div class="flex flex-col gap-0.5">
+                  <span class="font-title-sm text-title-sm text-on-surface font-bold">
+                    Rodonaves Express Climatizado
+                  </span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">
+                    3 a 5 dias úteis · Rastreio Fiscal &amp; Seguro Total
+                  </span>
+                </div>
+                <span class="font-title-sm text-title-sm font-bold text-primary shrink-0">
+                  {{ carrinho.frete() === 0 ? 'Grátis' : (carrinho.frete() | currency: 'BRL') }}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                (click)="selecionarLogistica('gollog')"
+                class="p-3.5 rounded-xl border text-left transition-all flex items-start justify-between gap-3 cursor-pointer"
+                [class]="
+                  modalidadeLogistica() === 'gollog'
+                    ? 'bg-[#dcfce7]/50 border-[#15803d] shadow-xs'
+                    : 'bg-surface-container-low/50 border-outline-variant/40 hover:bg-surface-container-low'
+                "
+              >
+                <div class="flex flex-col gap-0.5">
+                  <span class="font-title-sm text-title-sm text-on-surface font-bold">
+                    Despacho Aéreo Gollog Cargo
+                  </span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">
+                    24h a 48h úteis · Prioridade Aeroportuária
+                  </span>
+                </div>
+                <span class="font-title-sm text-title-sm font-bold text-on-surface shrink-0">
+                  R$ 64,90
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEÇÃO 3: FORMA DE PAGAMENTO / FATURAMENTO -->
+        <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-space-md">
+          <div class="flex items-center gap-2 pb-space-xs border-b border-outline-variant/20">
+            <span class="w-6 h-6 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold flex items-center justify-center">
+              3
+            </span>
+            <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+              Modalidade de Faturamento &amp; Pagamento
+            </h2>
+          </div>
+
+          <mat-radio-group formControlName="forma" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <label
+              (click)="selecionarForma('pix')"
+              class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2"
+              [class]="
+                form.controls.forma.value === 'pix'
+                  ? 'bg-[#dcfce7]/60 border-[#15803d] shadow-xs'
+                  : 'bg-surface-container-low/50 border-outline-variant/40 hover:bg-surface-container-low'
+              "
+            >
+              <div class="flex items-center justify-between">
+                <mat-radio-button value="pix">
+                  <span class="font-title-sm text-title-sm font-bold text-on-surface">PIX (5% OFF)</span>
+                </mat-radio-button>
+                <span class="material-symbols-outlined text-primary text-[22px]">qr_code_2</span>
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                Aprovação instantânea e liberação imediata do lote no WMS.
+              </span>
+            </label>
+
+            <label
+              (click)="selecionarForma('cartao')"
+              class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2"
+              [class]="
+                form.controls.forma.value === 'cartao'
+                  ? 'bg-[#dcfce7]/60 border-[#15803d] shadow-xs'
+                  : 'bg-surface-container-low/50 border-outline-variant/40 hover:bg-surface-container-low'
+              "
+            >
+              <div class="flex items-center justify-between">
+                <mat-radio-button value="cartao">
+                  <span class="font-title-sm text-title-sm font-bold text-on-surface">Cartão Corporativo</span>
+                </mat-radio-button>
+                <span class="material-symbols-outlined text-primary text-[22px]">credit_card</span>
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                Em até 6x sem juros com confirmação imediata.
+              </span>
+            </label>
+
+            <label
+              (click)="selecionarForma('boleto')"
+              class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-2"
+              [class]="
+                form.controls.forma.value === 'boleto'
+                  ? 'bg-[#dcfce7]/60 border-[#15803d] shadow-xs'
+                  : 'bg-surface-container-low/50 border-outline-variant/40 hover:bg-surface-container-low'
+              "
+            >
+              <div class="flex items-center justify-between">
+                <mat-radio-button value="boleto">
+                  <span class="font-title-sm text-title-sm font-bold text-on-surface">Boleto B2B</span>
+                </mat-radio-button>
+                <span class="material-symbols-outlined text-primary text-[22px]">receipt</span>
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                Boleto bancário registrado com compensação em 1 dia útil.
+              </span>
+            </label>
+          </mat-radio-group>
+
+          @if (form.controls.forma.value === 'pix') {
+            <div class="p-4 rounded-xl bg-[#dcfce7]/50 border border-[#15803d]/30 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[28px]">qr_code_scanner</span>
+              </div>
+              <div class="flex flex-col">
+                <strong class="font-title-sm text-title-sm text-[#14532d]">
+                  Economia direta de {{ descontoPix() | currency: 'BRL' }} aplicada no pedido!
+                </strong>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">
+                  O QR Code e a chave PIX Copia e Cola serão gerados assim que você confirmar o faturamento.
+                </span>
+              </div>
+            </div>
+          }
+
+          @if (form.controls.forma.value === 'cartao') {
+            <div class="formulario pt-2">
+              <mat-form-field appearance="outline" class="c2">
+                <mat-label>Número do cartão</mat-label>
+                <input matInput formControlName="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="19" />
+                <mat-error>{{ mensagemErro('numeroCartao') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="c2">
+                <mat-label>Nome impresso no cartão</mat-label>
+                <input matInput formControlName="nomeCartao" />
+                <mat-error>{{ mensagemErro('nomeCartao') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="c1">
+                <mat-label>Validade</mat-label>
+                <input matInput formControlName="validade" placeholder="MM/AA" maxlength="5" />
+                <mat-error>{{ mensagemErro('validade') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="c1">
+                <mat-label>CVV</mat-label>
+                <input matInput formControlName="cvv" maxlength="4" />
+                <mat-error>{{ mensagemErro('cvv') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="c2">
+                <mat-label>Parcelamento sem juros</mat-label>
+                <mat-select formControlName="parcelas">
+                  @for (n of parcelas(); track n) {
+                    <mat-option [value]="n">{{ n }}x de {{ totalFinal() / n | currency: 'BRL' }} sem juros</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+
+          @if (form.controls.forma.value === 'boleto') {
+            <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[26px]">barcode</span>
+              </div>
+              <div class="flex flex-col">
+                <strong class="font-title-sm text-title-sm text-on-surface">
+                  Faturamento via Boleto Bancário Registrado
+                </strong>
+                <span class="font-body-sm text-body-sm text-on-surface-variant">
+                  A linha digitável e o arquivo PDF do boleto ficarão disponíveis na tela de confirmação imediatamente após concluir.
+                </span>
+              </div>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- COLUNA DIREITA (4 cols): Resumo Sticky de Fechamento -->
+      <aside class="lg:col-span-4 flex flex-col gap-space-md lg:sticky lg:top-24">
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-md flex flex-col gap-space-md">
+          <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/25">
+            <h2 class="font-title-lg text-title-lg text-on-surface font-bold">Resumo de Faturamento</h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+              {{ carrinho.quantidadeTotal() }} un
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-3 font-body-md text-body-md">
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Produtos ({{ carrinho.quantidadeTotal() }} itens)</span>
+              <strong class="text-on-surface">{{ carrinho.subtotal() | currency: 'BRL' }}</strong>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Frete ({{ modalidadeLogistica() === 'gollog' ? 'Gollog Aéreo' : 'Rodonaves' }})</span>
+              <strong class="text-on-surface">
+                {{ custoLogistica() === 0 ? 'Bonificado (Grátis)' : (custoLogistica() | currency: 'BRL') }}
+              </strong>
+            </div>
+            @if (descontoPix() > 0) {
+              <div class="flex justify-between text-primary">
+                <span>Desconto PIX (5%)</span>
+                <strong>- {{ descontoPix() | currency: 'BRL' }}</strong>
+              </div>
+            }
+          </div>
+
+          <div class="pt-space-md border-t border-outline-variant/30 flex items-baseline justify-between">
+            <span class="font-title-md text-title-md text-on-surface font-bold">Total a Pagar</span>
+            <span class="font-headline-md text-headline-md text-primary font-extrabold">
+              {{ totalFinal() | currency: 'BRL' }}
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="carrinho.itens().length === 0"
+            class="w-full h-12 rounded-xl bg-primary-container hover:bg-primary disabled:opacity-50 text-on-primary font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span class="material-symbols-outlined text-[20px]">verified</span>
+            <span>Confirmar &amp; Emitir Pedido</span>
+          </button>
+
+          <p class="font-body-sm text-body-sm text-on-surface-variant text-center">
+            Ao confirmar, o lote será reservado sob protocolo FEFO e a pré-DANFE será gerada.
+          </p>
+        </div>
+      </aside>
+    </form>
   }
-</section>
+</div>

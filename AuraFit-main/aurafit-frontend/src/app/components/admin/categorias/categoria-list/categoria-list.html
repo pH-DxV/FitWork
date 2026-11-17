@@ -1,66 +1,306 @@
-<section class="pagina">
-  <header class="topo-pagina">
-    <div>
-      <h1>Categorias</h1>
-      <p class="subtitulo">Organização do catálogo (whey, creatina, pré-treino...).</p>
+<div class="flex flex-col gap-space-xl">
+  <!-- TOPO DA PÁGINA (Tela 08 do Stitch: Categorias) -->
+  <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+    <div class="flex flex-col gap-1 max-w-3xl">
+      <div class="flex flex-wrap items-center gap-2">
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
+          Categorias
+        </h1>
+        <span class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">
+          <span class="material-symbols-outlined text-[14px]">category</span>
+          Taxonomia &amp; Catálogo
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#15803d]"></span>
+          {{ totalItems() }} categorias ativas
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Agrupamento nutricional dos produtos da loja. Categorias vinculadas a produtos possuem proteção de integridade referencial contra exclusão acidental.
+      </p>
     </div>
-    <a mat-flat-button routerLink="/admin/categorias/nova">
-      <mat-icon>add</mat-icon>
-      Nova categoria
-    </a>
-  </header>
 
-  <div class="cartao">
-    <mat-form-field appearance="outline" class="c4" style="width: 100%">
-      <mat-label>Buscar por nome</mat-label>
-      <input matInput #campoBusca (input)="buscar(campoBusca.value)" placeholder="Ex.: Whey" />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+    <div class="flex items-center gap-2.5 shrink-0">
+      <button
+        type="button"
+        (click)="limparFormulario()"
+        class="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-title-sm text-title-sm transition-colors cursor-pointer"
+      >
+        <span class="material-symbols-outlined text-[18px]">refresh</span>
+        <span>Novo no Painel Lateral</span>
+      </button>
+      <a
+        routerLink="/admin/categorias/nova"
+        class="inline-flex items-center gap-2 px-5 h-10 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-sm text-title-sm font-bold shadow-sm transition-all"
+      >
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span>Nova Categoria</span>
+      </a>
+    </div>
+  </section>
 
-    @if (erro()) {
-      <p class="mensagem-erro">{{ erro() }}</p>
-    }
+  <!-- 4 KPI CARDS (Fiel ao Stitch 08) -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total de Categorias</span>
+        <div class="w-10 h-10 rounded-xl bg-[#dcfce7] text-[#15803d] flex items-center justify-center">
+          <span class="material-symbols-outlined text-[22px]">category</span>
+        </div>
+      </div>
+      <div class="mt-3">
+        <span class="font-display-md text-3xl text-on-surface font-extrabold">{{ totalItems() }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant ml-1.5">registradas</span>
+      </div>
+    </div>
 
-    <div class="tabela-container">
-      <table mat-table [dataSource]="categorias()" class="tabela">
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Nome</th>
-          <td mat-cell *matCellDef="let categoria"><strong>{{ categoria.nome }}</strong></td>
-        </ng-container>
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">SKUs Classificados</span>
+        <div class="w-10 h-10 rounded-xl bg-surface-container text-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+        </div>
+      </div>
+      <div class="mt-3">
+        <span class="font-display-md text-3xl text-on-surface font-extrabold">{{ produtos().length }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant ml-1.5">produtos vinculados</span>
+      </div>
+    </div>
 
-        <ng-container matColumnDef="descricao">
-          <th mat-header-cell *matHeaderCellDef>Descrição</th>
-          <td mat-cell *matCellDef="let categoria">{{ categoria.descricao ?? '—' }}</td>
-        </ng-container>
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Disponibilidade</span>
+        <div class="w-10 h-10 rounded-xl bg-[#dcfce7] text-[#15803d] flex items-center justify-center">
+          <span class="material-symbols-outlined text-[22px]">storefront</span>
+        </div>
+      </div>
+      <div class="mt-3">
+        <span class="font-display-md text-3xl text-primary font-extrabold">100%</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant ml-1.5">visíveis na loja</span>
+      </div>
+    </div>
 
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let categoria" class="acoes">
-            <a mat-icon-button [routerLink]="['/admin/categorias/editar', categoria.id]" aria-label="Editar">
-              <mat-icon>edit</mat-icon>
-            </a>
-            <button mat-icon-button (click)="excluir(categoria)" aria-label="Excluir">
-              <mat-icon>delete</mat-icon>
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col justify-between">
+      <div class="flex items-center justify-between">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Integridade B2B</span>
+        <div class="w-10 h-10 rounded-xl bg-surface-container text-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-[22px]">verified_user</span>
+        </div>
+      </div>
+      <div class="mt-3">
+        <span class="font-headline-sm text-headline-sm text-on-surface font-extrabold">RFC 7807 Ativo</span>
+        <p class="font-body-sm text-body-sm text-primary mt-0.5">Proteção contra deleção órfã</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ÁREA DE OPERAÇÃO EM 2 COLUNAS (8 cols Tabela / 4 cols Formulário Rápido + Proporção) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <!-- COLUNA ESQUERDA (8 cols): Busca + Tabela + Paginação -->
+    <section class="lg:col-span-8 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-xs overflow-hidden flex flex-col">
+      <div class="p-space-lg border-b border-outline-variant/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
+          <mat-label>Buscar por nome da categoria</mat-label>
+          <input #campoBusca matInput (input)="buscar(campoBusca.value)" placeholder="Ex.: Proteínas, Aminoácidos..." />
+          <mat-icon matPrefix>search</mat-icon>
+          @if (filtro()) {
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="campoBusca.value = ''; buscar('')"
+              aria-label="Limpar busca"
+            >
+              <mat-icon>close</mat-icon>
             </button>
-          </td>
-        </ng-container>
+          }
+        </mat-form-field>
+      </div>
 
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
-            {{ carregando() ? 'Carregando...' : 'Nenhuma categoria encontrada.' }}
-          </td>
-        </tr>
-      </table>
-    </div>
+      @if (erro()) {
+        <div class="m-space-lg p-4 rounded-xl bg-error-container text-on-error-container font-title-sm text-title-sm">
+          {{ erro() }}
+        </div>
+      }
 
-    <mat-paginator
-      [length]="totalItems()"
-      [pageIndex]="pageIndex()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 20]"
-      (page)="mudarPagina($event)"
-    />
+      <div class="tabela-container">
+        <table mat-table [dataSource]="categorias()" class="tabela">
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef>Código</th>
+            <td mat-cell *matCellDef="let categoria" class="font-mono text-body-sm text-on-surface-variant font-bold">
+              #CAT-{{ categoria.id }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Taxonomia / Categoria</th>
+            <td mat-cell *matCellDef="let categoria">
+              <div class="py-1.5 flex flex-col">
+                <strong class="font-title-sm text-title-sm text-on-surface font-bold">{{ categoria.nome }}</strong>
+                <span class="texto-secundario">{{ categoria.descricao || 'Sem descrição complementar' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="produtos">
+            <th mat-header-cell *matHeaderCellDef>Produtos Vinculados</th>
+            <td mat-cell *matCellDef="let categoria">
+              <span class="selo neutro">{{ contarProdutos(categoria.id) }} produtos</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let _categoria">
+              <span class="selo">Ativa</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="acoes">Ações</th>
+            <td mat-cell *matCellDef="let categoria" class="acoes">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="selecionarParaEdicao(categoria)"
+                aria-label="Editar no painel lateral"
+                title="Editar no painel lateral"
+              >
+                <mat-icon>edit_note</mat-icon>
+              </button>
+              <a
+                mat-icon-button
+                [routerLink]="['/admin/categorias/editar', categoria.id]"
+                aria-label="Abrir página de edição"
+                title="Abrir tela de edição"
+              >
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+              <button
+                mat-icon-button
+                color="warn"
+                type="button"
+                (click)="excluir(categoria)"
+                aria-label="Excluir categoria"
+                title="Excluir categoria"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunas"></tr>
+        </table>
+
+        @if (!carregando() && categorias().length === 0) {
+          <p class="vazio">Nenhuma categoria encontrada.</p>
+        }
+      </div>
+
+      <div class="border-t border-outline-variant/20">
+        <mat-paginator
+          [length]="totalItems()"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[5, 10, 20]"
+          (page)="mudarPagina($event)"
+          aria-label="Paginação de categorias"
+        />
+      </div>
+    </section>
+
+    <!-- COLUNA DIREITA (4 cols): Formulário Lateral Integrado & Proporção do Catálogo -->
+    <aside class="lg:col-span-4 flex flex-col gap-space-lg">
+      <!-- Card 1: Formulário Rápido Cadastrar/Editar Categoria -->
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[22px]">category</span>
+            <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+              {{ idEdicao() ? 'Editar Categoria #' + idEdicao() : 'Cadastrar Categoria' }}
+            </h2>
+          </div>
+          @if (idEdicao() || form.dirty) {
+            <button
+              type="button"
+              (click)="limparFormulario()"
+              class="font-label-sm text-label-sm text-primary hover:underline cursor-pointer"
+            >
+              Limpar
+            </button>
+          }
+        </div>
+
+        @if (erroForm()) {
+          <div class="p-3 rounded-xl bg-error-container text-on-error-container font-body-sm text-body-sm">
+            {{ erroForm() }}
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="salvarInline()" novalidate class="flex flex-col gap-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nome da categoria</mat-label>
+            <input matInput formControlName="nome" maxlength="100" />
+            <mat-hint align="end">{{ form.controls.nome.value.length }}/100</mat-hint>
+            <mat-error>{{ mensagemErro('nome') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Descrição técnica (opcional)</mat-label>
+            <textarea matInput rows="3" formControlName="descricao" maxlength="255"></textarea>
+            <mat-hint align="end">{{ form.controls.descricao.value.length }}/255</mat-hint>
+            <mat-error>{{ mensagemErro('descricao') }}</mat-error>
+          </mat-form-field>
+
+          <!-- Alerta de Regra de Integridade -->
+          <div class="p-3 rounded-xl bg-[#fef3c7] border border-[#fde68a] text-[#92400e] flex items-start gap-2.5 my-1">
+            <span class="material-symbols-outlined text-[18px] text-[#b45309] mt-0.5">shield</span>
+            <p class="font-body-sm text-body-sm leading-snug">
+              <strong>Regra de Integridade:</strong> Categorias com produtos vinculados não podem ser removidas fisicamente.
+            </p>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            @if (idEdicao()) {
+              <button mat-button type="button" (click)="limparFormulario()">Cancelar</button>
+            }
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="salvandoForm()"
+            >
+              {{ salvandoForm() ? 'Salvando...' : idEdicao() ? 'Atualizar Categoria' : 'Salvar Categoria' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card 2: Proporção do Catálogo -->
+      <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">pie_chart</span>
+            <h3 class="font-title-sm text-title-sm text-on-surface font-bold">Proporção do Catálogo</h3>
+          </div>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">{{ produtos().length }} SKUs</span>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          @for (item of proporcaoCatalogo(); track item.nome) {
+            <div class="flex flex-col gap-1">
+              <div class="flex justify-between font-label-md text-label-md">
+                <span class="text-on-surface font-semibold truncate">{{ item.nome }}</span>
+                <span class="text-on-surface-variant">{{ item.percentual }}% ({{ item.quantidade }} SKUs)</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+                <div class="h-full bg-primary-container rounded-full" [style.width.%]="item.percentual || 6"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
   </div>
-</section>
+</div>

@@ -1,40 +1,44 @@
-<section class="pagina estreita">
-  <a mat-button routerLink="/admin/categorias" class="voltar">
-    <mat-icon>arrow_back</mat-icon>
-    Voltar para categorias
-  </a>
-
-  <header class="topo-pagina">
-    <h1>{{ id() ? 'Editar categoria' : 'Nova categoria' }}</h1>
-  </header>
+<div class="pagina estreita flex flex-col gap-space-lg">
+  <div class="flex flex-col gap-1">
+    <a
+      routerLink="/admin/categorias"
+      class="inline-flex items-center gap-1 font-title-sm text-title-sm text-primary-container hover:underline self-start"
+    >
+      <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+      <span>Voltar para Categorias</span>
+    </a>
+    <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight mt-1">
+      {{ id() ? 'Editar Categoria #' + id() : 'Nova Categoria' }}
+    </h1>
+    <p class="font-body-md text-body-md text-on-surface-variant">
+      Defina o nome e a descrição da categoria para agrupamento dos suplementos na vitrine e nos relatórios.
+    </p>
+  </div>
 
   @if (erroGeral()) {
-    <p class="mensagem-erro">{{ erroGeral() }}</p>
+    <div class="mensagem-erro">{{ erroGeral() }}</div>
   }
 
-  @if (carregando()) {
-    <p>Carregando...</p>
-  } @else {
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="formulario cartao">
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Nome</mat-label>
-        <input matInput formControlName="nome" placeholder="Ex.: Whey Protein" />
-        <mat-error>{{ mensagemErro('nome') }}</mat-error>
-      </mat-form-field>
+  <form [formGroup]="form" (ngSubmit)="salvar()" class="cartao formulario" novalidate>
+    <mat-form-field appearance="outline" class="c4">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" maxlength="100" />
+      <mat-hint align="end">{{ form.controls.nome.value.length }}/100</mat-hint>
+      <mat-error>{{ mensagemErro('nome') }}</mat-error>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline" class="c4">
-        <mat-label>Descrição (opcional)</mat-label>
-        <textarea matInput formControlName="descricao" rows="3"></textarea>
-        <mat-hint align="end">{{ form.controls.descricao.value.length }}/255</mat-hint>
-        <mat-error>{{ mensagemErro('descricao') }}</mat-error>
-      </mat-form-field>
+    <mat-form-field appearance="outline" class="c4">
+      <mat-label>Descrição (opcional)</mat-label>
+      <textarea matInput rows="3" formControlName="descricao" maxlength="255"></textarea>
+      <mat-hint align="end">{{ form.controls.descricao.value.length }}/255</mat-hint>
+      <mat-error>{{ mensagemErro('descricao') }}</mat-error>
+    </mat-form-field>
 
-      <div class="botoes">
-        <a mat-stroked-button routerLink="/admin/categorias">Cancelar</a>
-        <button mat-flat-button type="submit" [disabled]="salvando()">
-          {{ salvando() ? 'Salvando...' : 'Salvar' }}
-        </button>
-      </div>
-    </form>
-  }
-</section>
+    <div class="botoes">
+      <a mat-button routerLink="/admin/categorias">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="salvando() || carregando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar Categoria' }}
+      </button>
+    </div>
+  </form>
+</div>

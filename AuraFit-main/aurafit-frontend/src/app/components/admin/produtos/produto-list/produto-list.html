@@ -1,81 +1,161 @@
-<section class="pagina">
-  <header class="topo-pagina">
-    <div>
-      <h1>Produtos</h1>
-      <p class="subtitulo">Catálogo de suplementos com marca, categoria e fornecedor.</p>
-    </div>
-    <a mat-flat-button routerLink="/admin/produtos/novo">
-      <mat-icon>add</mat-icon>
-      Novo produto
-    </a>
-  </header>
-
-  <div class="cartao">
-    <div class="filtros">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Buscar por nome</mat-label>
-        <input matInput #campoBusca (input)="buscarPorNome(campoBusca.value)" placeholder="Ex.: Whey" />
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Tipo de proteína</mat-label>
-        <mat-select [value]="filtroTipo()" (selectionChange)="filtrarPorTipo($event.value)">
-          <mat-option [value]="null">Todos os tipos</mat-option>
-          @for (tipo of tipos(); track tipo.id) {
-            <mat-option [value]="tipo.id">{{ tipo.nome }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Categoria</mat-label>
-        <mat-select [value]="filtroCategoria()" (selectionChange)="filtrarPorCategoria($event.value)">
-          <mat-option [value]="null">Todas as categorias</mat-option>
-          @for (categoria of categorias(); track categoria.id) {
-            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Marca</mat-label>
-        <mat-select [value]="filtroMarca()" (selectionChange)="filtrarPorMarca($event.value)">
-          <mat-option [value]="null">Todas as marcas</mat-option>
-          @for (marca of marcas(); track marca.id) {
-            <mat-option [value]="marca.id">{{ marca.nome }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+<div class="flex flex-col gap-space-lg">
+  <!-- CABEÇALHO DA PÁGINA (Tela 06 do Stitch) -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+    <div class="flex flex-col gap-1">
+      <div class="flex flex-wrap items-center gap-space-sm">
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
+          Produtos
+        </h1>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+          Catálogo Geral
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#15803d]"></span>
+          {{ totalItems() }} SKUs registrados
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        Cadastro de suplementos com marca, categoria, fornecedor, tipo de proteína e sabores vinculados.
+      </p>
     </div>
 
-    <div class="resumo-filtro">
-      <span>{{ totalItems() }} produto(s) encontrado(s)</span>
-      @if (temFiltro()) {
-        <button mat-button (click)="limparFiltros(campoBusca)">
-          <mat-icon>filter_alt_off</mat-icon>
-          Limpar filtros
-        </button>
-      }
+    <div class="flex items-center gap-2.5 shrink-0">
+      <a
+        routerLink="/admin/estoque"
+        class="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-title-sm text-title-sm shadow-xs transition-all"
+      >
+        <span class="material-symbols-outlined text-[18px] text-primary">inventory</span>
+        <span>Lotes &amp; Estoque</span>
+      </a>
+      <a
+        routerLink="/admin/produtos/novo"
+        class="inline-flex items-center gap-2 px-5 h-10 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-sm text-title-sm font-bold shadow-sm transition-all"
+      >
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span>Novo produto</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTAINER PRINCIPAL: FILTROS + TABELA M3 + PAGINAÇÃO -->
+  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-xs overflow-hidden flex flex-col">
+    <!-- Barra de Filtros (4 Colunas) -->
+    <div class="p-space-lg bg-surface-container-lowest border-b border-outline-variant/20 flex flex-col gap-space-sm">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+          <mat-label>Buscar por nome</mat-label>
+          <input
+            #campoBusca
+            matInput
+            placeholder="Ex.: Whey, Creatina..."
+            (input)="buscarPorNome(campoBusca.value)"
+          />
+          <mat-icon matPrefix>search</mat-icon>
+          @if (filtroNome()) {
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="campoBusca.value = ''; buscarPorNome('')"
+              aria-label="Limpar busca"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+          <mat-label>Tipo de proteína</mat-label>
+          <mat-select [value]="filtroTipo()" (selectionChange)="filtrarPorTipo($event.value)">
+            <mat-option [value]="null">Todos</mat-option>
+            @for (tipo of tipos(); track tipo.id) {
+              <mat-option [value]="tipo.id">{{ tipo.nome }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+          <mat-label>Categoria</mat-label>
+          <mat-select [value]="filtroCategoria()" (selectionChange)="filtrarPorCategoria($event.value)">
+            <mat-option [value]="null">Todas</mat-option>
+            @for (categoria of categorias(); track categoria.id) {
+              <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+          <mat-label>Marca</mat-label>
+          <mat-select [value]="filtroMarca()" (selectionChange)="filtrarPorMarca($event.value)">
+            <mat-option [value]="null">Todas</mat-option>
+            @for (marca of marcas(); track marca.id) {
+              <mat-option [value]="marca.id">{{ marca.nome }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Resumo de Filtros -->
+      <div class="flex items-center justify-between pt-2">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full bg-surface-container text-primary-container font-label-md text-label-md font-bold">
+            {{ totalItems() }}
+          </span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant">
+            {{ totalItems() === 1 ? 'produto encontrado no catálogo' : 'produtos encontrados no catálogo' }}
+          </span>
+        </div>
+
+        @if (temFiltro()) {
+          <button
+            type="button"
+            (click)="limparFiltros(campoBusca)"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary-container hover:bg-surface-container font-title-sm text-title-sm transition-colors cursor-pointer"
+          >
+            <span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+            <span>Limpar filtros</span>
+          </button>
+        }
+      </div>
     </div>
 
     @if (erro()) {
-      <p class="mensagem-erro">{{ erro() }}</p>
+      <div class="m-space-lg p-4 rounded-xl bg-error-container text-on-error-container font-title-sm text-title-sm">
+        {{ erro() }}
+      </div>
     }
 
+    <!-- Tabela Estilizada Material 3 -->
     <div class="tabela-container">
       <table mat-table [dataSource]="produtos()" class="tabela">
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef>Produto</th>
           <td mat-cell *matCellDef="let produto">
-            <strong>{{ produto.nome }}</strong>
-            <span class="texto-secundario">{{ produto.pesoGramas }} g · {{ produto.sabores.length }} sabor(es)</span>
+            <div class="py-1.5 flex flex-col">
+              <strong class="font-title-sm text-title-sm text-on-surface font-bold">
+                {{ produto.nome }}
+              </strong>
+              <span class="texto-secundario">
+                {{ produto.pesoGramas }} g
+                @if (produto.sabores.length > 0) {
+                  —
+                  @for (sabor of produto.sabores; track sabor.id; let ultimo = $last) {
+                    {{ sabor.nome }}{{ ultimo ? '' : ', ' }}
+                  }
+                }
+              </span>
+            </div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="marca">
           <th mat-header-cell *matHeaderCellDef>Marca</th>
-          <td mat-cell *matCellDef="let produto">{{ produto.marca.nome }}</td>
+          <td mat-cell *matCellDef="let produto">
+            <span class="font-medium text-on-surface">{{ produto.marca.nome }}</span>
+            @if (!produto.marca.ativa) {
+              <span class="texto-secundario">(inativa)</span>
+            }
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="categoria">
@@ -85,19 +165,23 @@
 
         <ng-container matColumnDef="tipo">
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
-          <td mat-cell *matCellDef="let produto">{{ produto.tipoProteina.nome }}</td>
+          <td mat-cell *matCellDef="let produto">
+            <span class="selo neutro">{{ produto.tipoProteina.label }}</span>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="preco">
           <th mat-header-cell *matHeaderCellDef class="numero">Preço</th>
-          <td mat-cell *matCellDef="let produto" class="numero">{{ produto.preco | currency: 'BRL' }}</td>
+          <td mat-cell *matCellDef="let produto" class="numero font-title-sm text-primary-container font-bold">
+            {{ produto.preco | currency: 'BRL' }}
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="estoque">
           <th mat-header-cell *matHeaderCellDef class="numero">Estoque</th>
           <td mat-cell *matCellDef="let produto" class="numero">
-            <span class="selo" [class.alerta]="produto.estoque > 0 && produto.estoque < 10" [class.erro]="produto.estoque === 0">
-              {{ produto.estoque }}
+            <span [class]="produto.estoque === 0 ? 'selo erro' : produto.estoque <= 5 ? 'selo alerta' : ''">
+              {{ produto.estoque }} un
             </span>
           </td>
         </ng-container>
@@ -105,39 +189,54 @@
         <ng-container matColumnDef="situacao">
           <th mat-header-cell *matHeaderCellDef>Situação</th>
           <td mat-cell *matCellDef="let produto">
-            <span class="selo" [class.neutro]="!produto.ativo">{{ produto.ativo ? 'Ativo' : 'Inativo' }}</span>
+            <span [class]="produto.ativo ? 'selo' : 'selo neutro'">
+              {{ produto.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th mat-header-cell *matHeaderCellDef class="acoes">Ações</th>
           <td mat-cell *matCellDef="let produto" class="acoes">
-            <a mat-icon-button [routerLink]="['/admin/produtos/editar', produto.id]" aria-label="Editar">
+            <a
+              mat-icon-button
+              [routerLink]="['/admin/produtos/editar', produto.id]"
+              aria-label="Editar produto"
+              title="Editar produto"
+            >
               <mat-icon>edit</mat-icon>
             </a>
-            <button mat-icon-button (click)="excluir(produto)" aria-label="Excluir">
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              (click)="excluir(produto)"
+              aria-label="Excluir produto"
+              title="Excluir produto"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let linha; columns: colunas"></tr>
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell vazio" [attr.colspan]="colunas.length">
-            {{ carregando() ? 'Carregando...' : 'Nenhum produto encontrado com esses filtros.' }}
-          </td>
-        </tr>
+        <tr mat-row *matRowDef="let row; columns: colunas"></tr>
       </table>
+
+      @if (!carregando() && produtos().length === 0) {
+        <p class="vazio">Nenhum produto encontrado para os filtros informados.</p>
+      }
     </div>
 
-    <mat-paginator
-      [length]="totalItems()"
-      [pageIndex]="pageIndex()"
-      [pageSize]="pageSize()"
-      [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons
-      (page)="mudarPagina($event)"
-    />
+    <div class="border-t border-outline-variant/20 bg-surface-container-lowest">
+      <mat-paginator
+        [length]="totalItems()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (page)="mudarPagina($event)"
+        aria-label="Paginação de produtos"
+      />
+    </div>
   </div>
-</section>
+</div>
