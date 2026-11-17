@@ -1,0 +1,324 @@
+<div class="max-w-[1440px] mx-auto px-space-md md:px-space-xl py-space-lg flex flex-col gap-space-xl">
+  <!-- STEPPER DE PROGRESSO DO CHECKOUT B2B (4 Etapas - Padrão Stitch) -->
+  <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <!-- Etapa 1: Ativa -->
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-[#dcfce7]/70 border border-[#15803d]/30">
+        <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+          1
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Etapa Atual</span>
+          <span class="font-title-sm text-title-sm text-on-surface font-bold">1. Carrinho &amp; Volume</span>
+        </div>
+      </div>
+
+      <!-- Etapa 2 -->
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low/60 text-on-surface-variant">
+        <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+          2
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider">Próxima Etapa</span>
+          <span class="font-title-sm text-title-sm font-semibold">2. Fiscal &amp; Entrega</span>
+        </div>
+      </div>
+
+      <!-- Etapa 3 -->
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low/60 text-on-surface-variant">
+        <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+          3
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider">Financeiro</span>
+          <span class="font-title-sm text-title-sm font-semibold">3. Faturamento</span>
+        </div>
+      </div>
+
+      <!-- Etapa 4 -->
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low/60 text-on-surface-variant">
+        <div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-title-sm text-title-sm font-bold flex items-center justify-center shrink-0">
+          4
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-sm text-label-sm uppercase tracking-wider">Conclusão</span>
+          <span class="font-title-sm text-title-sm font-semibold">4. Confirmação &amp; DANFE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CABEÇALHO DA PÁGINA -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-2.5">
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight">
+          Carrinho &amp; Cotação de Volume
+        </h1>
+        <span class="px-3 py-1 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+          {{ carrinho.quantidadeTotal() }} {{ carrinho.quantidadeTotal() === 1 ? 'unidade' : 'unidades' }}
+        </span>
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        Confira os lotes, sabores selecionados e quantidades antes de prosseguir para a emissão fiscal e pagamento.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a
+        routerLink="/loja"
+        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface font-title-sm text-title-sm transition-colors"
+      >
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        <span>Continuar comprando</span>
+      </a>
+      @if (carrinho.itens().length > 0) {
+        <button
+          type="button"
+          (click)="carrinho.limpar()"
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-error-container/50 hover:bg-error-container text-on-error-container font-title-sm text-title-sm transition-colors cursor-pointer"
+        >
+          <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+          <span>Limpar cotação</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (carrinho.itens().length === 0) {
+    <!-- ESTADO VAZIO -->
+    <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-12 text-center flex flex-col items-center gap-4 shadow-sm">
+      <div class="w-20 h-20 rounded-2xl bg-surface-container text-primary flex items-center justify-center">
+        <span class="material-symbols-outlined text-[42px]">shopping_bag</span>
+      </div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+        Sua cotação de pedido está vazia
+      </h2>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+        Explore nosso catálogo de Whey Protein Isolado, Creatina Creapure® e Pré-Treinos para montar seu pedido com desconto progressivo no PIX.
+      </p>
+      <a
+        routerLink="/loja"
+        class="mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-sm text-title-sm font-bold shadow-sm transition-all"
+      >
+        <span class="material-symbols-outlined text-[20px]">storefront</span>
+        <span>Explorar Vitrine de Suplementos</span>
+      </a>
+    </section>
+  } @else {
+    <!-- BARRA DE PROGRESSO DE FRETE BONIFICADO -->
+    <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm flex flex-col gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#dcfce7] text-[#15803d] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+          </div>
+          @if (faltaParaFreteGratis() > 0) {
+            <span class="font-body-md text-body-md text-on-surface">
+              Adicione mais <strong class="text-primary">{{ faltaParaFreteGratis() | currency: 'BRL' }}</strong> para liberar
+              <strong>Frete Expresso Bonificado (Grátis)</strong>!
+            </span>
+          } @else {
+            <span class="font-title-sm text-title-sm text-[#14532d] font-bold">
+              Parabéns! Seu pedido atingiu a meta de Frete Expresso Bonificado (Grátis) com seguro de carga total.
+            </span>
+          }
+        </div>
+        <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm font-bold self-start sm:self-auto">
+          {{ progressoFrete().toFixed(0) }}% da meta
+        </span>
+      </div>
+
+      <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+        <div
+          class="h-full bg-gradient-to-r from-[#00652c] to-[#15803d] rounded-full transition-all duration-500"
+          [style.width.%]="progressoFrete()"
+        ></div>
+      </div>
+    </section>
+
+    <!-- GRID PRINCIPAL 2 COLUNAS (65% Itens / 35% Resumo Sticky) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+      <!-- COLUNA ESQUERDA (8 cols): Lista de SKUs -->
+      <section class="lg:col-span-8 flex flex-col gap-space-md" aria-label="Itens do carrinho">
+        @for (item of carrinho.itens(); track item.produto.id + '-' + (item.sabor ?? '')) {
+          <article class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+            <!-- Info do Produto -->
+            <div class="flex items-start gap-4 flex-1 min-w-0">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-[#95f8a7] font-headline-sm text-headline-sm font-extrabold flex flex-col items-center justify-center shrink-0 shadow-sm">
+                <span>{{ item.produto.marca.nome.slice(0, 2).toUpperCase() }}</span>
+                <span class="text-[10px] text-white/80 font-normal">{{ item.produto.pesoGramas }}g</span>
+              </div>
+
+              <div class="flex flex-col gap-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="px-2 py-0.5 rounded bg-surface-container text-primary font-label-sm text-label-sm uppercase">
+                    {{ item.produto.marca.nome }}
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm">
+                    {{ item.produto.tipoProteina.nome }}
+                  </span>
+                  <span class="font-mono text-body-sm text-on-surface-variant">
+                    SKU #{{ item.produto.id }}
+                  </span>
+                </div>
+
+                <h3 class="font-title-md text-title-md text-on-surface font-bold truncate">
+                  {{ item.produto.nome }}
+                </h3>
+
+                <div class="flex flex-wrap items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+                  @if (item.sabor) {
+                    <span class="inline-flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[15px] text-primary">icecream</span>
+                      <span>Sabor: <strong class="text-on-surface">{{ item.sabor }}</strong></span>
+                    </span>
+                  }
+                  <span>Peso unitário: {{ item.produto.pesoGramas }}g</span>
+                  <span>Unitário: <strong>{{ item.produto.preco | currency: 'BRL' }}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controles de Quantidade e Subtotal -->
+            <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-outline-variant/20">
+              <!-- Stepper de Quantidade -->
+              <div class="flex flex-col items-center gap-1">
+                <div class="inline-flex items-center rounded-xl bg-surface-container-low border border-outline-variant/40 p-1">
+                  <button
+                    type="button"
+                    (click)="alterar(item, -1)"
+                    aria-label="Diminuir quantidade"
+                    class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">remove</span>
+                  </button>
+                  <span class="w-10 text-center font-title-sm text-title-sm text-on-surface font-bold">
+                    {{ item.quantidade }}
+                  </span>
+                  <button
+                    type="button"
+                    (click)="alterar(item, 1)"
+                    [disabled]="item.quantidade >= item.produto.estoque"
+                    aria-label="Aumentar quantidade"
+                    class="w-8 h-8 rounded-lg hover:bg-surface-container text-on-surface disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                  </button>
+                </div>
+                <span class="font-label-sm text-[10px] text-on-surface-variant">
+                  Máx: {{ item.produto.estoque }} un
+                </span>
+              </div>
+
+              <!-- Subtotal do Item -->
+              <div class="flex flex-col items-end min-w-[115px]">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Subtotal</span>
+                <span class="font-headline-sm text-headline-sm text-on-surface font-extrabold">
+                  {{ item.produto.preco * item.quantidade | currency: 'BRL' }}
+                </span>
+                <span class="font-label-sm text-[11px] text-primary">
+                  {{ item.produto.preco * item.quantidade * 0.95 | currency: 'BRL' }} no PIX
+                </span>
+              </div>
+
+              <!-- Remover -->
+              <button
+                type="button"
+                (click)="carrinho.remover(item)"
+                aria-label="Remover item"
+                title="Remover item do pedido"
+                class="p-2 rounded-xl text-on-surface-variant hover:text-error hover:bg-error-container/40 transition-colors cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+              </button>
+            </div>
+          </article>
+        }
+      </section>
+
+      <!-- COLUNA DIREITA (4 cols): Resumo da Cotação B2B Sticky -->
+      <aside class="lg:col-span-4 flex flex-col gap-space-md lg:sticky lg:top-24" aria-label="Resumo do pedido">
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-md flex flex-col gap-space-md">
+          <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/25">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary-container text-[22px]">receipt_long</span>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">Resumo da Cotação</h2>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+              Cubagem: {{ pesoTotalKg() }} kg
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-3 font-body-md text-body-md">
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span>Subtotal ({{ carrinho.quantidadeTotal() }} itens)</span>
+              <strong class="text-on-surface">{{ carrinho.subtotal() | currency: 'BRL' }}</strong>
+            </div>
+
+            <div class="flex items-center justify-between text-on-surface-variant">
+              <span>Frete Rodoviário Climatizado</span>
+              @if (carrinho.frete() === 0) {
+                <span class="px-2 py-0.5 rounded bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+                  BONIFICADO (GRÁTIS)
+                </span>
+              } @else {
+                <strong class="text-on-surface">{{ carrinho.frete() | currency: 'BRL' }}</strong>
+              }
+            </div>
+
+            <div class="flex items-center justify-between text-primary">
+              <span>Desconto PIX Corporativo (5%)</span>
+              <strong>- {{ carrinho.subtotal() * 0.05 | currency: 'BRL' }}</strong>
+            </div>
+          </div>
+
+          <div class="pt-space-md border-t border-outline-variant/30 flex flex-col gap-1">
+            <div class="flex items-baseline justify-between">
+              <span class="font-title-md text-title-md text-on-surface font-bold">Total do Pedido</span>
+              <span class="font-headline-md text-headline-md text-on-surface font-extrabold">
+                {{ carrinho.total() | currency: 'BRL' }}
+              </span>
+            </div>
+            <div class="p-3 rounded-xl bg-[#dcfce7]/60 border border-[#15803d]/25 flex items-center justify-between mt-1">
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-[#14532d] uppercase">Valor com 5% OFF no PIX</span>
+                <span class="font-title-lg text-title-lg text-[#14532d] font-extrabold">
+                  {{ carrinho.total() - carrinho.subtotal() * 0.05 | currency: 'BRL' }}
+                </span>
+              </div>
+              <span class="material-symbols-outlined text-[#15803d] text-[26px]">qr_code_2</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            (click)="finalizar()"
+            class="w-full h-12 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>Avançar para Faturamento</span>
+            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+          </button>
+
+          <a
+            routerLink="/loja"
+            class="w-full h-10 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-title-sm text-title-sm flex items-center justify-center transition-colors"
+          >
+            Adicionar mais produtos
+          </a>
+        </div>
+
+        <!-- Card de Garantias Fiscais B2B -->
+        <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-lg flex flex-col gap-3 shadow-xs">
+          <div class="flex items-center gap-2 text-primary font-label-md text-label-md uppercase tracking-wider font-bold">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span>Garantias de Suprimento FitWork</span>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Todos os itens acompanham <strong>DANFE / XML</strong>, <strong>Laudo Cromatográfico por Lote</strong> e reserva prioritária sob critério sanitário <strong>FEFO</strong>.
+          </p>
+        </div>
+      </aside>
+    </div>
+  }
+</div>
