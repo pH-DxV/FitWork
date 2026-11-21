@@ -9,11 +9,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { Categoria } from '../../../../models/categoria.model';
 import { Fornecedor } from '../../../../models/fornecedor.model';
 import { Marca } from '../../../../models/marca.model';
-import { ProdutoRequest } from '../../../../models/produto.model';
+import { Produto, ProdutoRequest } from '../../../../models/produto.model';
 import { Sabor } from '../../../../models/sabor.model';
 import { TipoProteina } from '../../../../models/tipo-proteina.model';
 import { CategoriaService } from '../../../../services/categoria.service';
@@ -24,6 +24,9 @@ import { SaborService } from '../../../../services/sabor.service';
 import { aplicarErrosDaApi, mensagemErro } from '../../../../shared/erros-formulario';
 import { NotificacaoService } from '../../../../shared/notificacao.service';
 import { Validadores } from '../../../../shared/validadores';
+
+const TIPOS_IMAGEM_ACEITOS = ['image/jpeg', 'image/png', 'image/webp'];
+const TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024; // 5 MB
 
 @Component({
   selector: 'app-produto-form',
@@ -56,6 +59,14 @@ export class ProdutoForm implements OnInit {
   carregando = signal(false);
   salvando = signal(false);
   erroGeral = signal('');
+
+  arquivoImagem = signal<File | null>(null);
+  previewImagem = signal<string | null>(null);
+  nomeImagemAtual = signal<string | null>(null);
+  urlDownloadImagem = signal<string | null>(null);
+  possuiImagemPersistida = signal(false);
+  removerImagemAoSalvar = signal(false);
+  erroImagem = signal('');
 
   tipos = signal<TipoProteina[]>([]);
   categorias = signal<Categoria[]>([]);
@@ -131,6 +142,7 @@ export class ProdutoForm implements OnInit {
           idsSabores: produto.sabores.map((s) => s.id),
           ativo: produto.ativo,
         });
+        this.carregarEstadoImagem(produto);
         this.carregando.set(false);
       },
       error: () => {
@@ -138,6 +150,61 @@ export class ProdutoForm implements OnInit {
         this.carregando.set(false);
       },
     });
+  }
+
+  private carregarEstadoImagem(produto: Produto): void {
+    const urlVisualizacao = this.produtoService.urlImagem(produto, false);
+    const urlDownload = this.produtoService.urlImagem(produto, true);
+    this.previewImagem.set(urlVisualizacao);
+    this.urlDownloadImagem.set(urlDownload);
+    this.nomeImagemAtual.set(produto.nomeImagem ?? (urlVisualizacao ? `produto-${produto.id}` : null));
+    this.possuiImagemPersistida.set(!!urlVisualizacao);
+    this.removerImagemAoSalvar.set(false);
+    this.arquivoImagem.set(null);
+  }
+
+  selecionarArquivo(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const arquivo = input.files?.[0] ?? null;
+    this.erroImagem.set('');
+
+    if (!arquivo) return;
+
+    if (!TIPOS_IMAGEM_ACEITOS.includes(arquivo.type)) {
+      this.erroImagem.set('Formato inválido. Envie apenas imagens JPG, PNG ou WEBP.');
+      input.value = '';
+      return;
+    }
+
+    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) {
+      this.erroImagem.set('A imagem selecionada excede o limite máximo de 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.arquivoImagem.set(arquivo);
+    this.nomeImagemAtual.set(`${arquivo.name} (${(arquivo.size / 1024).toFixed(1)} KB)`);
+    this.removerImagemAoSalvar.set(false);
+
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      this.previewImagem.set(typeof leitor.result === 'string' ? leitor.result : null);
+    };
+    leitor.readAsDataURL(arquivo);
+  }
+
+  limparImagem(inputArquivo?: HTMLInputElement): void {
+    if (inputArquivo) {
+      inputArquivo.value = '';
+    }
+    this.erroImagem.set('');
+    this.arquivoImagem.set(null);
+    this.previewImagem.set(null);
+    this.nomeImagemAtual.set(null);
+    this.urlDownloadImagem.set(null);
+    if (this.possuiImagemPersistida()) {
+      this.removerImagemAoSalvar.set(true);
+    }
   }
 
   alternarSaborChip(idSabor: number): void {
@@ -183,7 +250,9 @@ export class ProdutoForm implements OnInit {
 
     this.salvando.set(true);
     this.erroGeral.set('');
+    this.erroImagem.set('');
 
+    const eraEdicao = !!this.id();
     const valores = this.form.getRawValue();
     const dados: ProdutoRequest = {
       nome: valores.nome.trim(),
@@ -199,19 +268,33 @@ export class ProdutoForm implements OnInit {
       ativo: valores.ativo,
     };
 
-    const requisicao: Observable<unknown> = this.id()
+    const requisicaoBase: Observable<Produto> = this.id()
       ? this.produtoService.alterar(this.id()!, dados)
       : this.produtoService.incluir(dados);
 
-    requisicao.subscribe({
-      next: () => {
-        this.notificacao.sucesso(this.id() ? 'Produto atualizado.' : 'Produto cadastrado.');
-        this.router.navigateByUrl('/admin/produtos');
-      },
-      error: (erro: HttpErrorResponse) => {
-        this.erroGeral.set(aplicarErrosDaApi(this.form, erro));
-        this.salvando.set(false);
-      },
-    });
+    requisicaoBase
+      .pipe(
+        switchMap((produtoSalvo) => {
+          this.id.set(produtoSalvo.id);
+          const arquivo = this.arquivoImagem();
+          if (arquivo) {
+            return this.produtoService.uploadImagem(produtoSalvo.id, arquivo);
+          }
+          if (this.removerImagemAoSalvar()) {
+            return this.produtoService.removerImagem(produtoSalvo.id).pipe(map(() => produtoSalvo));
+          }
+          return of(produtoSalvo);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.notificacao.sucesso(eraEdicao ? 'Produto atualizado.' : 'Produto cadastrado.');
+          this.router.navigateByUrl('/admin/produtos');
+        },
+        error: (erro: HttpErrorResponse) => {
+          this.erroGeral.set(aplicarErrosDaApi(this.form, erro));
+          this.salvando.set(false);
+        },
+      });
   }
 }

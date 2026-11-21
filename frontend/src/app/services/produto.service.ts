@@ -39,6 +39,29 @@ export class ProdutoService {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
 
+  uploadImagem(id: number, arquivo: File): Observable<Produto> {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo, arquivo.name);
+    return this.http.patch<Produto>(`${this.url}/${id}/imagem`, formData);
+  }
+
+  removerImagem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}/imagem`);
+  }
+
+  urlImagem(produto: Produto | null | undefined, download = false): string | null {
+    if (!produto?.imagemUrl) return null;
+    const caminho = produto.imagemUrl.startsWith('http')
+      ? produto.imagemUrl
+      : `${API_URL}${produto.imagemUrl}`;
+    const separador = caminho.includes('?') ? '&' : '?';
+    const sufixoNome = produto.nomeImagem ? `v=${encodeURIComponent(produto.nomeImagem)}` : '';
+    if (download) {
+      return `${caminho}${separador}download=true`;
+    }
+    return sufixoNome ? `${caminho}${separador}${sufixoNome}` : caminho;
+  }
+
   listarTiposProteina(): Observable<TipoProteina[]> {
     return this.http.get<TipoProteina[]>(`${API_URL}/tipos-proteina`);
   }

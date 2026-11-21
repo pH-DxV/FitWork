@@ -42,6 +42,9 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Inject
     SaborRepository saborRepository;
 
+    @Inject
+    StorageService storageService;
+
     @Override
     @Transactional
     public PageResponse<ProdutoResponseDTO> findAll(int page, int pageSize) {
@@ -104,7 +107,59 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Override
     @Transactional
     public void delete(long id) {
-        produtoRepository.delete(buscarProdutoOuFalhar(id));
+        Produto produto = buscarProdutoOuFalhar(id);
+        String chaveImagem = produto.getImagemKey();
+        produtoRepository.delete(produto);
+        if (chaveImagem != null && storageService != null) {
+            storageService.remover(chaveImagem);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ProdutoResponseDTO salvarImagem(long id, String nomeArquivo, String contentType, byte[] dados) {
+        Produto produto = buscarProdutoOuFalhar(id);
+        ArquivoArmazenado salvo = storageService.salvarImagem("produtos/" + id, nomeArquivo, contentType, dados);
+        String chaveAntiga = produto.getImagemKey();
+
+        produto.setImagemKey(salvo.chave());
+        produto.setImagemNome(salvo.nomeArquivo());
+        produto.setImagemContentType(salvo.contentType());
+
+        if (chaveAntiga != null && !chaveAntiga.equals(salvo.chave())) {
+            storageService.remover(chaveAntiga);
+        }
+        return ProdutoMapper.toResponse(produto);
+    }
+
+    @Override
+    @Transactional
+    public ArquivoArmazenado obterImagem(long id) {
+        Produto produto = buscarProdutoOuFalhar(id);
+        if (produto.getImagemKey() == null || produto.getImagemKey().isBlank()) {
+            throw new ResourceNotFoundException("Este produto não possui imagem cadastrada.");
+        }
+        ArquivoArmazenado arquivo = storageService.obter(produto.getImagemKey());
+        String nome = (produto.getImagemNome() != null && !produto.getImagemNome().isBlank())
+                ? produto.getImagemNome()
+                : arquivo.nomeArquivo();
+        String tipo = (produto.getImagemContentType() != null && !produto.getImagemContentType().isBlank())
+                ? produto.getImagemContentType()
+                : arquivo.contentType();
+        return new ArquivoArmazenado(arquivo.chave(), nome, tipo, arquivo.conteudo());
+    }
+
+    @Override
+    @Transactional
+    public void removerImagem(long id) {
+        Produto produto = buscarProdutoOuFalhar(id);
+        String chaveAntiga = produto.getImagemKey();
+        produto.setImagemKey(null);
+        produto.setImagemNome(null);
+        produto.setImagemContentType(null);
+        if (chaveAntiga != null && storageService != null) {
+            storageService.remover(chaveAntiga);
+        }
     }
 
     private void aplicarDados(Produto produto, ProdutoRequestDTO dto) {

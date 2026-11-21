@@ -214,6 +214,112 @@
           </div>
           <mat-slide-toggle formControlName="ativo"></mat-slide-toggle>
         </div>
+      </section>
+
+      <!-- CARD 3: IMAGEM DO PRODUTO (OBJECT STORAGE S3 / RUSTFS) -->
+      <section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-xl shadow-xs flex flex-col gap-space-md">
+        <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-[#dcfce7] text-[#15803d] font-title-sm font-bold flex items-center justify-center">
+              3
+            </span>
+            <div>
+              <h2 class="font-title-lg text-title-lg text-on-surface font-bold">
+                Imagem Oficial do Produto (Object Storage S3)
+              </h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Armazenada via API S3 (RustFS). Formatos aceitos: JPG, PNG ou WEBP (máx. 5 MB).
+              </p>
+            </div>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            S3 · RustFS
+          </span>
+        </div>
+
+        <input
+          #inputArquivo
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          class="hidden"
+          (change)="selecionarArquivo($event)"
+        />
+
+        @if (erroImagem()) {
+          <div class="p-3 rounded-xl bg-error-container text-on-error-container font-body-sm text-body-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">warning</span>
+            <span>{{ erroImagem() }}</span>
+          </div>
+        }
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-surface-container-low/60 border border-dashed border-outline-variant/50">
+          @if (previewImagem()) {
+            <img
+              [src]="previewImagem()!"
+              alt="Prévia da imagem do produto"
+              class="w-24 h-24 rounded-xl object-contain bg-white border border-outline-variant/30 p-1.5 shadow-xs shrink-0"
+            />
+          } @else {
+            <div class="w-24 h-24 rounded-xl bg-surface-container text-on-surface-variant flex flex-col items-center justify-center shrink-0 border border-outline-variant/30">
+              <span class="material-symbols-outlined text-[30px] text-primary">cloud_upload</span>
+              <span class="font-label-sm text-[10px] uppercase mt-1">Sem imagem</span>
+            </div>
+          }
+
+          <div class="flex-1 flex flex-col gap-2 text-center sm:text-left">
+            <div class="flex flex-col">
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">
+                {{ nomeImagemAtual() || 'Nenhuma imagem selecionada para este SKU' }}
+              </span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">
+                @if (removerImagemAoSalvar()) {
+                  A imagem atual será removida do bucket S3 ao salvar o produto.
+                } @else if (arquivoImagem()) {
+                  Nova imagem pronta para envio ao bucket S3 ao clicar em Salvar Produto.
+                } @else if (possuiImagemPersistida()) {
+                  Imagem armazenada no Object Storage S3 e ativa na vitrine.
+                } @else {
+                  Selecione uma imagem nítida da embalagem para exibição no catálogo da loja.
+                }
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="inputArquivo.click()"
+              >
+                <mat-icon>upload_file</mat-icon>
+                {{ previewImagem() ? 'Trocar imagem' : 'Selecionar imagem' }}
+              </button>
+
+              @if (urlDownloadImagem() && !arquivoImagem()) {
+                <a
+                  mat-stroked-button
+                  [href]="urlDownloadImagem()!"
+                  target="_blank"
+                  download
+                >
+                  <mat-icon>download</mat-icon>
+                  Baixar imagem
+                </a>
+              }
+
+              @if (previewImagem()) {
+                <button
+                  mat-button
+                  color="warn"
+                  type="button"
+                  (click)="limparImagem(inputArquivo)"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                  Remover imagem
+                </button>
+              }
+            </div>
+          </div>
+        </div>
 
         <!-- Barra de Ações -->
         <div class="pt-4 border-t border-outline-variant/25 flex items-center justify-end gap-3">
@@ -256,9 +362,17 @@
                 {{ form.controls.pesoGramas.value || 900 }}g
               </span>
             </div>
-            <div class="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-[#95f8a7] font-headline-sm font-extrabold flex items-center justify-center shadow">
-              {{ nomeMarcaSelecionada().slice(0, 2).toUpperCase() }}
-            </div>
+            @if (previewImagem()) {
+              <img
+                [src]="previewImagem()!"
+                alt="Prévia na vitrine"
+                class="mx-auto w-16 h-16 rounded-xl object-contain bg-white p-1 shadow"
+              />
+            } @else {
+              <div class="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-[#95f8a7] font-headline-sm font-extrabold flex items-center justify-center shadow">
+                {{ nomeMarcaSelecionada().slice(0, 2).toUpperCase() }}
+              </div>
+            }
             <span class="font-label-sm text-[10px] text-[#14532d] font-bold">
               Estoque: {{ form.controls.estoque.value ?? 0 }} un
             </span>

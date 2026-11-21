@@ -151,6 +151,10 @@ export class ProdutoList implements OnInit {
     });
   }
 
+  urlImagem(produto: Produto, download = false): string | null {
+    return this.produtoService.urlImagem(produto, download);
+  }
+
   private recarregarDoInicio(): void {
     this.pageIndex.set(0);
     this.carregar();

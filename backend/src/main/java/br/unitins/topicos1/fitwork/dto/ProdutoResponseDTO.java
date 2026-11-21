@@ -17,6 +17,8 @@ public record ProdutoResponseDTO(
     CategoriaResponseDTO categoria,
     MarcaResponseDTO marca,
     FornecedorResponseDTO fornecedor,
-    List<SaborResponseDTO> sabores
+    List<SaborResponseDTO> sabores,
+    String nomeImagem,
+    String imagemUrl
 ) {
 }

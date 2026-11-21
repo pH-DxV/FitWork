@@ -17,6 +17,8 @@ export interface Produto {
   marca: Marca;
   fornecedor: Fornecedor;
   sabores: Sabor[];
+  nomeImagem?: string | null;
+  imagemUrl?: string | null;
 }
 
 export interface ProdutoRequest {

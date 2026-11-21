@@ -12,6 +12,11 @@ public final class ProdutoMapper {
     }
 
     public static ProdutoResponseDTO toResponse(Produto produto) {
+        boolean temImagem = produto.getImagemKey() != null && !produto.getImagemKey().isBlank();
+        String imagemUrl = (temImagem && produto.getId() != null)
+                ? "/produtos/" + produto.getId() + "/imagem"
+                : null;
+
         return new ProdutoResponseDTO(
                 produto.getId(),
                 produto.getNome(),
@@ -27,6 +32,8 @@ public final class ProdutoMapper {
                 produto.getSabores().stream()
                         .sorted(Comparator.comparing(Sabor::getNome))
                         .map(SaborMapper::toResponse)
-                        .toList());
+                        .toList(),
+                temImagem ? produto.getImagemNome() : null,
+                imagemUrl);
     }
 }

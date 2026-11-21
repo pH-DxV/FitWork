@@ -31,4 +31,10 @@ public interface ProdutoService {
     ProdutoResponseDTO update(long id, @NotNull(message = "Os dados devem ser informados.") @Valid ProdutoRequestDTO dto);
 
     void delete(long id);
+
+    ProdutoResponseDTO salvarImagem(long id, String nomeArquivo, String contentType, byte[] dados);
+
+    ArquivoArmazenado obterImagem(long id);
+
+    void removerImagem(long id);
 }

@@ -181,6 +181,10 @@ export class Catalogo implements OnInit {
     return produto.marca.nome.slice(0, 2).toUpperCase();
   }
 
+  urlImagem(produto: Produto, download = false): string | null {
+    return this.produtoService.urlImagem(produto, download);
+  }
+
   formatarPeso(gramas: number): string {
     if (gramas >= 1000) {
       const kg = gramas / 1000;

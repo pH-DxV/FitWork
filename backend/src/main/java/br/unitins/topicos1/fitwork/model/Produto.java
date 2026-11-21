@@ -56,6 +56,15 @@ public class Produto extends DefaultEntity {
     @BatchSize(size = 25)
     private Set<Sabor> sabores = new HashSet<>();
 
+    @Column(length = 255)
+    private String imagemKey;
+
+    @Column(length = 160)
+    private String imagemNome;
+
+    @Column(length = 80)
+    private String imagemContentType;
+
     public String getNome() {
         return nome;
     }
@@ -145,5 +154,29 @@ public class Produto extends DefaultEntity {
         if (sabores != null) {
             this.sabores.addAll(sabores);
         }
+    }
+
+    public String getImagemKey() {
+        return imagemKey;
+    }
+
+    public void setImagemKey(String imagemKey) {
+        this.imagemKey = imagemKey;
+    }
+
+    public String getImagemNome() {
+        return imagemNome;
+    }
+
+    public void setImagemNome(String imagemNome) {
+        this.imagemNome = imagemNome;
+    }
+
+    public String getImagemContentType() {
+        return imagemContentType;
+    }
+
+    public void setImagemContentType(String imagemContentType) {
+        this.imagemContentType = imagemContentType;
     }
 }

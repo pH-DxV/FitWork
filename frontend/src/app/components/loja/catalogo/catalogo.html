@@ -287,30 +287,51 @@
                 </span>
               </div>
 
-              <button
-                type="button"
-                (click)="alternarFavorito(produto.id)"
-                [title]="ehFavorito(produto.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
-                class="w-8 h-8 rounded-full bg-surface-container-lowest/90 hover:bg-surface-container-lowest flex items-center justify-center transition-transform active:scale-95 shadow-sm"
-                [class.text-error]="ehFavorito(produto.id)"
-                [class.text-on-surface-variant]="!ehFavorito(produto.id)"
-              >
-                <span class="material-symbols-outlined text-[18px]">
-                  {{ ehFavorito(produto.id) ? 'favorite' : 'favorite_border' }}
-                </span>
-              </button>
+              <div class="flex items-center gap-1.5">
+                @if (urlImagem(produto, true); as downloadUrl) {
+                  <a
+                    [href]="downloadUrl"
+                    target="_blank"
+                    download
+                    title="Baixar imagem oficial do produto"
+                    class="w-8 h-8 rounded-full bg-surface-container-lowest/90 hover:bg-surface-container-lowest text-on-surface-variant hover:text-primary flex items-center justify-center transition-transform active:scale-95 shadow-sm"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                  </a>
+                }
+                <button
+                  type="button"
+                  (click)="alternarFavorito(produto.id)"
+                  [title]="ehFavorito(produto.id) ? 'Remover dos favoritos' : 'Salvar nos favoritos'"
+                  class="w-8 h-8 rounded-full bg-surface-container-lowest/90 hover:bg-surface-container-lowest flex items-center justify-center transition-transform active:scale-95 shadow-sm"
+                  [class.text-error]="ehFavorito(produto.id)"
+                  [class.text-on-surface-variant]="!ehFavorito(produto.id)"
+                >
+                  <span class="material-symbols-outlined text-[18px]">
+                    {{ ehFavorito(produto.id) ? 'favorite' : 'favorite_border' }}
+                  </span>
+                </button>
+              </div>
             </div>
 
-            <!-- Representação Visual do Pote / Embalagem -->
+            <!-- Representação Visual do Pote / Embalagem (S3 ou Fallback Iniciais) -->
             <div class="my-auto flex flex-col items-center justify-center select-none group-hover:scale-105 transition-transform duration-300">
-              <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-white shadow-lg border-2 border-white/60 flex flex-col items-center justify-center relative">
-                <span class="font-display-md text-2xl font-extrabold tracking-tight text-[#95f8a7] leading-none">
-                  {{ iniciais(produto) }}
-                </span>
-                <span class="font-label-sm text-[10px] text-white/80 uppercase tracking-widest mt-1">
-                  {{ formatarPeso(produto.pesoGramas) }}
-                </span>
-              </div>
+              @if (urlImagem(produto); as imgUrl) {
+                <img
+                  [src]="imgUrl"
+                  [alt]="produto.nome"
+                  class="w-28 h-28 rounded-2xl object-contain bg-white/95 p-1.5 shadow-lg border-2 border-white/80"
+                />
+              } @else {
+                <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#00652c] to-[#121e16] text-white shadow-lg border-2 border-white/60 flex flex-col items-center justify-center relative">
+                  <span class="font-display-md text-2xl font-extrabold tracking-tight text-[#95f8a7] leading-none">
+                    {{ iniciais(produto) }}
+                  </span>
+                  <span class="font-label-sm text-[10px] text-white/80 uppercase tracking-widest mt-1">
+                    {{ formatarPeso(produto.pesoGramas) }}
+                  </span>
+                </div>
+              }
             </div>
 
             <!-- Badge Inferior de Estoque / Lote -->

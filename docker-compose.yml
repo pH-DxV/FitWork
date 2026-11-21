@@ -1,0 +1,19 @@
+services:
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: fitwork-rustfs
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY:-fitwork}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY:-fitwork123}
+    volumes:
+      - rustfs_data:/data
+    restart: unless-stopped
+
+volumes:
+  rustfs_data:
