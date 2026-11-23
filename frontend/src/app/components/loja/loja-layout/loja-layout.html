@@ -120,7 +120,7 @@
             </div>
             <div class="hidden sm:flex flex-col">
               <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider leading-none">
-                Conta Homologada
+                {{ sessao.ehAdmin() ? 'Perfil ADMIN' : 'Perfil CLIENTE' }}
               </span>
               <span class="font-title-sm text-title-sm text-on-surface leading-tight truncate max-w-[130px]">
                 {{ cliente.nome.split(' ')[0] }}
@@ -137,10 +137,12 @@
               <mat-icon>shopping_cart</mat-icon>
               <span>Cotação / Carrinho B2B</span>
             </a>
-            <a mat-menu-item routerLink="/admin">
-              <mat-icon>admin_panel_settings</mat-icon>
-              <span>Painel Administrativo</span>
-            </a>
+            @if (sessao.ehAdmin()) {
+              <a mat-menu-item routerLink="/admin">
+                <mat-icon>admin_panel_settings</mat-icon>
+                <span>Painel Administrativo</span>
+              </a>
+            }
             <button mat-menu-item (click)="sair()">
               <mat-icon>logout</mat-icon>
               <span>Encerrar Sessão</span>

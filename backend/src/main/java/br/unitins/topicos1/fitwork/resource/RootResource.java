@@ -3,6 +3,7 @@ package br.unitins.topicos1.fitwork.resource;
 import java.net.URI;
 
 import io.quarkus.runtime.LaunchMode;
+import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/")
+@PermitAll
 public class RootResource {
 
     @GET

@@ -21,12 +21,28 @@ public class Cliente extends DefaultEntity {
     @Column(nullable = false)
     private boolean ativo = true;
 
+    /**
+     * Identificador (claim "sub") da conta do usuário no Keycloak.
+     * A senha fica exclusivamente no Keycloak: o banco do e-commerce NUNCA armazena senhas.
+     * Pode ser nulo para clientes cadastrados pelo administrador que ainda não possuem acesso.
+     */
+    @Column(length = 64, unique = true)
+    private String keycloakId;
+
     public Pessoa getPessoa() {
         return pessoa;
     }
 
     public void setPessoa(Pessoa pessoa) {
         this.pessoa = pessoa;
+    }
+
+    public String getKeycloakId() {
+        return keycloakId;
+    }
+
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
     }
 
     public boolean isAceitaNovidades() {

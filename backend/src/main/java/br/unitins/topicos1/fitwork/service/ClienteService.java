@@ -21,4 +21,18 @@ public interface ClienteService {
     ClienteResponseDTO update(long id, @NotNull(message = "Os dados devem ser informados.") @Valid ClienteRequestDTO dto);
 
     void delete(long id);
+
+    /** Valida regras de negócio e unicidade (CPF/e-mail) antes de criar a conta no Keycloak. */
+    void validarNovoCadastro(@NotNull(message = "Os dados devem ser informados.") @Valid ClienteRequestDTO dto);
+
+    /** Persiste o cliente já vinculado ao identificador (sub) criado no Keycloak. */
+    ClienteResponseDTO criarVinculadoAoKeycloak(
+            @NotNull(message = "Os dados devem ser informados.") @Valid ClienteRequestDTO dto,
+            String keycloakId);
+
+    /**
+     * Localiza o cliente pelo keycloakId (ou vincula no primeiro acesso por e-mail).
+     * Retorna null quando o usuário autenticado não possui cadastro de cliente (ex.: ADMIN puro).
+     */
+    ClienteResponseDTO vincularOuBuscarPorKeycloak(String keycloakId, String email);
 }

@@ -4,6 +4,8 @@ import br.unitins.topicos1.fitwork.dto.MarcaRequestDTO;
 import br.unitins.topicos1.fitwork.dto.MarcaResponseDTO;
 import br.unitins.topicos1.fitwork.dto.PageResponse;
 import br.unitins.topicos1.fitwork.service.MarcaService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +34,7 @@ public class MarcaResource {
     MarcaService service;
 
     @GET
+    @PermitAll
     public PageResponse<MarcaResponseDTO> buscarTodos(@QueryParam("nome") String nome,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
@@ -44,6 +47,7 @@ public class MarcaResource {
     @Deprecated
     @GET
     @Path("/nome/{nome}")
+    @PermitAll
     public PageResponse<MarcaResponseDTO> buscarPorNome(@PathParam("nome") String nome,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
@@ -52,12 +56,14 @@ public class MarcaResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public MarcaResponseDTO buscarPorId(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         return service.findById(id);
     }
 
     @POST
+    @RolesAllowed("ADMIN")
     public Response incluir(
             @NotNull(message = "Os dados devem ser informados.") @Valid MarcaRequestDTO dto,
             @Context UriInfo uriInfo) {
@@ -69,6 +75,7 @@ public class MarcaResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public MarcaResponseDTO alterar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
             @NotNull(message = "Os dados devem ser informados.") @Valid MarcaRequestDTO dto) {
@@ -77,6 +84,7 @@ public class MarcaResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public Response apagar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         service.delete(id);

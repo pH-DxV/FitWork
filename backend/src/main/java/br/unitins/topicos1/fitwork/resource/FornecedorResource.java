@@ -4,6 +4,7 @@ import br.unitins.topicos1.fitwork.dto.FornecedorRequestDTO;
 import br.unitins.topicos1.fitwork.dto.FornecedorResponseDTO;
 import br.unitins.topicos1.fitwork.dto.PageResponse;
 import br.unitins.topicos1.fitwork.service.FornecedorService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -23,9 +24,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+/**
+ * Dados corporativos de fornecedores (CNPJ, contatos e endereço fiscal) são restritos ao backoffice.
+ */
 @Path("fornecedores")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed("ADMIN")
 public class FornecedorResource {
 
     @Inject

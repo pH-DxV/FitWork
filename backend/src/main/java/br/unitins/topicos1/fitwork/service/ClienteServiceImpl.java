@@ -35,6 +35,9 @@ public class ClienteServiceImpl implements ClienteService {
     @Inject
     MunicipioService municipioService;
 
+    @Inject
+    KeycloakGateway keycloakGateway;
+
     @Override
     @Transactional
     public PageResponse<ClienteResponseDTO> findAll(int page, int pageSize) {
@@ -66,10 +69,47 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public ClienteResponseDTO create(ClienteRequestDTO dto) {
+        return criarInterno(dto, null);
+    }
+
+    @Override
+    @Transactional
+    public void validarNovoCadastro(ClienteRequestDTO dto) {
+        validarDados(dto, null);
+    }
+
+    @Override
+    @Transactional
+    public ClienteResponseDTO criarVinculadoAoKeycloak(ClienteRequestDTO dto, String keycloakId) {
+        return criarInterno(dto, keycloakId);
+    }
+
+    @Override
+    @Transactional
+    public ClienteResponseDTO vincularOuBuscarPorKeycloak(String keycloakId, String email) {
+        Cliente cliente = clienteRepository.findByKeycloakId(keycloakId);
+        if (cliente == null && email != null && !email.isBlank()) {
+            cliente = clienteRepository.findNaoVinculadoByEmail(email);
+            if (cliente != null && keycloakId != null && !keycloakId.isBlank()) {
+                cliente.setKeycloakId(keycloakId);
+            }
+        }
+        if (cliente == null) {
+            return null;
+        }
+        if (!cliente.isAtivo()) {
+            throw new io.quarkus.security.ForbiddenException(
+                    "Sua conta de cliente está desativada. Entre em contato com o suporte.");
+        }
+        return ClienteMapper.toResponse(cliente);
+    }
+
+    private ClienteResponseDTO criarInterno(ClienteRequestDTO dto, String keycloakId) {
         validarDados(dto, null);
 
         Cliente cliente = new Cliente();
         cliente.setPessoa(new Pessoa());
+        cliente.setKeycloakId(Textos.limparOuNulo(keycloakId));
         aplicarDados(cliente, dto);
 
         clienteRepository.persist(cliente);
@@ -82,6 +122,13 @@ public class ClienteServiceImpl implements ClienteService {
         Cliente cliente = buscarClienteOuFalhar(id);
         validarDados(dto, cliente.getPessoa().getId());
         aplicarDados(cliente, dto);
+        if (keycloakGateway != null && cliente.getKeycloakId() != null) {
+            keycloakGateway.atualizarDadosUsuario(
+                    cliente.getKeycloakId(),
+                    cliente.getPessoa().getNome(),
+                    cliente.getPessoa().getEmail(),
+                    cliente.isAtivo());
+        }
         return ClienteMapper.toResponse(cliente);
     }
 
@@ -89,10 +136,14 @@ public class ClienteServiceImpl implements ClienteService {
     @Transactional
     public void delete(long id) {
         Cliente cliente = buscarClienteOuFalhar(id);
+        String keycloakId = cliente.getKeycloakId();
         Pessoa pessoa = cliente.getPessoa();
         clienteRepository.delete(cliente);
         if (pessoa != null && !pessoaPossuiOutrosVinculos(pessoa.getId())) {
             pessoaRepository.delete(pessoa);
+        }
+        if (keycloakGateway != null && keycloakId != null) {
+            keycloakGateway.removerUsuario(keycloakId);
         }
     }
 

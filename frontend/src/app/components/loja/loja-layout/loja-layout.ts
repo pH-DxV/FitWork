@@ -50,7 +50,8 @@ export class LojaLayout {
   }
 
   sair(): void {
-    this.sessao.sair();
-    this.router.navigateByUrl('/loja');
+    this.sessao.sair().subscribe(() => {
+      this.router.navigateByUrl('/loja');
+    });
   }
 }

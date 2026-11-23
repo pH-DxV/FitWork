@@ -28,6 +28,8 @@ export function mensagemErro(controle: AbstractControl | null): string {
   if (erros['data']) return 'Data inválida.';
   if (erros['dataFutura']) return 'A data deve ser anterior a hoje.';
   if (erros['idadeMinima']) return `É preciso ter pelo menos ${erros['idadeMinima'].requerida} anos.`;
+  if (erros['senhaFraca']) return 'Inclua ao menos uma letra maiúscula, uma minúscula e um número.';
+  if (erros['senhasDiferentes']) return 'A confirmação de senha não confere.';
   return 'Valor inválido.';
 }
 

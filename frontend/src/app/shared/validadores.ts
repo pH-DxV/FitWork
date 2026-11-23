@@ -99,4 +99,24 @@ export class Validadores {
       return idade < idadeMinima ? { idadeMinima: { requerida: idadeMinima } } : null;
     };
   }
+
+  /** Exige ao menos uma letra maiúscula, uma minúscula e um número (política do Keycloak). */
+  static senhaForte(control: AbstractControl): ValidationErrors | null {
+    const valor = control.value as string | null;
+    if (!valor) return null;
+    const possuiMinuscula = /[a-z]/.test(valor);
+    const possuiMaiuscula = /[A-Z]/.test(valor);
+    const possuiNumero = /\d/.test(valor);
+    return possuiMinuscula && possuiMaiuscula && possuiNumero ? null : { senhaFraca: true };
+  }
+
+  /** Valida se o campo de confirmação coincide com o campo de senha. */
+  static igualAoCampo(nomeCampoOriginal: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const valor = control.value as string | null;
+      if (!valor || !control.parent) return null;
+      const original = control.parent.get(nomeCampoOriginal)?.value as string | null;
+      return valor === original ? null : { senhasDiferentes: true };
+    };
+  }
 }

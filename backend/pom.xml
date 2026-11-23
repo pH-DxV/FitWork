@@ -81,6 +81,12 @@
             <artifactId>quarkus-arc</artifactId>
         </dependency>
 
+        <!-- Segurança: validação de tokens OIDC (Keycloak) + @RolesAllowed -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
+        </dependency>
+
         <!-- Object Storage S3 (RustFS / S3-compatible) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>

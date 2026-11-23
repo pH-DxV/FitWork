@@ -1,0 +1,134 @@
+{
+  "realm": "fitwork",
+  "displayName": "FitWork",
+  "enabled": true,
+  "sslRequired": "external",
+
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "editUsernameAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "verifyEmail": false,
+
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "maxDeltaTimeSeconds": 43200,
+  "minimumQuickLoginWaitSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+
+  "passwordPolicy": "length(8) and maxLength(64) and digits(1) and lowerCase(1) and upperCase(1) and notUsername(undefined) and notEmail(undefined)",
+
+  "eventsEnabled": true,
+  "eventsExpiration": 604800,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": false,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrador do e-commerce FitWork: gerencia catálogo, estoque, fornecedores e clientes."
+      },
+      {
+        "name": "CLIENTE",
+        "description": "Cliente da loja FitWork: acessa e altera apenas os próprios dados e pedidos."
+      }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "fitwork-backend",
+      "name": "FitWork Backend (Quarkus)",
+      "description": "Cliente confidencial usado SOMENTE pelo back-end Quarkus. O front-end Angular nunca conhece este segredo.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "frontchannelLogout": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "use.refresh.tokens": "true",
+        "client_credentials.use_refresh_token": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "fitwork-backend-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "fitwork-backend",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "service-account-fitwork-backend",
+      "enabled": true,
+      "serviceAccountClientId": "fitwork-backend",
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "query-users"]
+      }
+    },
+    {
+      "username": "admin@fitwork.com",
+      "email": "admin@fitwork.com",
+      "firstName": "Administrador",
+      "lastName": "FitWork",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "Admin@123", "temporary": false }],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "ana.martins@fitwork.com",
+      "email": "ana.martins@fitwork.com",
+      "firstName": "Ana",
+      "lastName": "Martins",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "Cliente@123", "temporary": false }],
+      "realmRoles": ["CLIENTE"]
+    },
+    {
+      "username": "bruno.costa@fitwork.com",
+      "email": "bruno.costa@fitwork.com",
+      "firstName": "Bruno",
+      "lastName": "Costa",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "Cliente@123", "temporary": false }],
+      "realmRoles": ["CLIENTE"]
+    }
+  ]
+}

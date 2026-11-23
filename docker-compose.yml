@@ -15,5 +15,26 @@ services:
       - rustfs_data:/data
     restart: unless-stopped
 
+  # Provedor de identidade (IAM). Apenas o back-end Quarkus conversa com ele.
+  # Os valores padrão abaixo servem SOMENTE para desenvolvimento local:
+  # em qualquer outro ambiente defina as variáveis em um arquivo .env (nunca versionado).
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: fitwork-keycloak
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "8180:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HEALTH_ENABLED: "true"
+      # usado pelo placeholder ${KEYCLOAK_CLIENT_SECRET} do fitwork-realm.json
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-fitwork-backend-dev-secret}
+    volumes:
+      - ./keycloak/fitwork-realm.json:/opt/keycloak/data/import/fitwork-realm.json:ro
+      - keycloak_data:/opt/keycloak/data
+    restart: unless-stopped
+
 volumes:
   rustfs_data:
+  keycloak_data:

@@ -3,6 +3,7 @@ package br.unitins.topicos1.fitwork.resource;
 import br.unitins.topicos1.fitwork.dto.MunicipioResponseDTO;
 import br.unitins.topicos1.fitwork.dto.PageResponse;
 import br.unitins.topicos1.fitwork.service.MunicipioService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.DefaultValue;
@@ -15,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("municipios")
 @Produces(MediaType.APPLICATION_JSON)
+@PermitAll
 public class MunicipioResource {
 
     @Inject

@@ -13,6 +13,8 @@ import br.unitins.topicos1.fitwork.exception.ValidationException;
 import br.unitins.topicos1.fitwork.service.ArquivoArmazenado;
 import br.unitins.topicos1.fitwork.service.ProdutoService;
 import br.unitins.topicos1.fitwork.service.StorageService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -41,29 +43,27 @@ public class ProdutoResource {
     @Inject
     ProdutoService service;
 
-    /**
-     * Listagem paginada com filtros opcionais.
-     * Ex.: GET /produtos?nome=whey&idTipoProteina=2&idCategoria=1&idMarca=3&ativo=true&page=0&pageSize=10
-     */
     @GET
+    @PermitAll
     public PageResponse<ProdutoResponseDTO> buscarTodos(@QueryParam("nome") String nome,
-            @QueryParam("idTipoProteina") Long idTipoProteina,
-            @QueryParam("idCategoria") Long idCategoria,
-            @QueryParam("idMarca") Long idMarca,
-            @QueryParam("ativo") Boolean ativo,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
-        return service.buscar(nome, idTipoProteina, idCategoria, idMarca, ativo, page, pageSize);
+        if (nome != null && !nome.isBlank()) {
+            return service.findByNome(nome, page, pageSize);
+        }
+        return service.findAll(page, pageSize);
     }
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public ProdutoResponseDTO buscarPorId(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         return service.findById(id);
     }
 
     @POST
+    @RolesAllowed("ADMIN")
     public Response incluir(
             @NotNull(message = "Os dados devem ser informados.") @Valid ProdutoRequestDTO dto,
             @Context UriInfo uriInfo) {
@@ -75,6 +75,7 @@ public class ProdutoResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public ProdutoResponseDTO alterar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
             @NotNull(message = "Os dados devem ser informados.") @Valid ProdutoRequestDTO dto) {
@@ -83,6 +84,7 @@ public class ProdutoResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public Response apagar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         service.delete(id);
@@ -94,6 +96,7 @@ public class ProdutoResource {
      */
     @PATCH
     @Path("/{id}/imagem")
+    @RolesAllowed("ADMIN")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public ProdutoResponseDTO uploadImagem(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
@@ -120,6 +123,7 @@ public class ProdutoResource {
      */
     @GET
     @Path("/{id}/imagem")
+    @PermitAll
     @Produces({ "image/jpeg", "image/png", "image/webp", MediaType.APPLICATION_OCTET_STREAM })
     public Response obterImagem(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
@@ -138,6 +142,7 @@ public class ProdutoResource {
      */
     @DELETE
     @Path("/{id}/imagem")
+    @RolesAllowed("ADMIN")
     public Response removerImagem(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         service.removerImagem(id);

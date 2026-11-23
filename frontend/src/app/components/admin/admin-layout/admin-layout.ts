@@ -1,13 +1,14 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
+import { SessaoService } from '../../../services/sessao.service';
 
 interface ItemMenu {
   rota: string;
@@ -32,6 +33,8 @@ interface ItemMenu {
 })
 export class AdminLayout {
   private breakpoint = inject(BreakpointObserver);
+  private router = inject(Router);
+  sessao = inject(SessaoService);
 
   telaPequena = toSignal(this.breakpoint.observe('(max-width: 1023px)').pipe(map((r) => r.matches)), {
     initialValue: false,
@@ -51,5 +54,21 @@ export class AdminLayout {
 
   fecharMenuMobile(): void {
     this.menuMobileAberto.set(false);
+  }
+
+  iniciais(nome?: string): string {
+    if (!nome) return 'AD';
+    return nome
+      .split(' ')
+      .filter((p) => p)
+      .slice(0, 2)
+      .map((p) => p[0].toUpperCase())
+      .join('');
+  }
+
+  sair(): void {
+    this.sessao.sair().subscribe(() => {
+      this.router.navigateByUrl('/loja/login');
+    });
   }
 }

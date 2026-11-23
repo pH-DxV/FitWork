@@ -1,9 +1,11 @@
 package br.unitins.topicos1.fitwork.resource;
 
+import br.unitins.topicos1.fitwork.dto.PageResponse;
 import br.unitins.topicos1.fitwork.dto.SaborRequestDTO;
 import br.unitins.topicos1.fitwork.dto.SaborResponseDTO;
-import br.unitins.topicos1.fitwork.dto.PageResponse;
 import br.unitins.topicos1.fitwork.service.SaborService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +34,7 @@ public class SaborResource {
     SaborService service;
 
     @GET
+    @PermitAll
     public PageResponse<SaborResponseDTO> buscarTodos(@QueryParam("nome") String nome,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
@@ -44,6 +47,7 @@ public class SaborResource {
     @Deprecated
     @GET
     @Path("/nome/{nome}")
+    @PermitAll
     public PageResponse<SaborResponseDTO> buscarPorNome(@PathParam("nome") String nome,
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("pageSize") @DefaultValue("10") int pageSize) {
@@ -52,12 +56,14 @@ public class SaborResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public SaborResponseDTO buscarPorId(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         return service.findById(id);
     }
 
     @POST
+    @RolesAllowed("ADMIN")
     public Response incluir(
             @NotNull(message = "Os dados devem ser informados.") @Valid SaborRequestDTO dto,
             @Context UriInfo uriInfo) {
@@ -69,6 +75,7 @@ public class SaborResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public SaborResponseDTO alterar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id,
             @NotNull(message = "Os dados devem ser informados.") @Valid SaborRequestDTO dto) {
@@ -77,6 +84,7 @@ public class SaborResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed("ADMIN")
     public Response apagar(
             @PathParam("id") @Positive(message = "O id deve ser positivo.") Long id) {
         service.delete(id);

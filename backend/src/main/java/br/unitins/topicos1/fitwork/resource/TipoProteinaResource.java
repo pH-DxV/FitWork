@@ -2,6 +2,7 @@ package br.unitins.topicos1.fitwork.resource;
 
 import br.unitins.topicos1.fitwork.exception.ResourceNotFoundException;
 import br.unitins.topicos1.fitwork.model.TipoProteina;
+import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -10,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("tipos-proteina")
 @Produces(MediaType.APPLICATION_JSON)
+@PermitAll
 public class TipoProteinaResource {
 
     @GET

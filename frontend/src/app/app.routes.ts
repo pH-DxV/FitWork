@@ -21,27 +21,40 @@ import { LojaLayout } from './components/loja/loja-layout/loja-layout';
 import { Login } from './components/loja/login/login';
 import { Pagamento } from './components/loja/pagamento/pagamento';
 import { Perfil } from './components/loja/perfil/perfil';
+import { adminGuard, authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'loja', pathMatch: 'full' },
 
-  // ---------- e-commerce (vitrine & checkout B2B) ----------
+  // ---------- e-commerce (vitrine pública & áreas autenticadas do cliente) ----------
   {
     path: 'loja',
     component: LojaLayout,
     children: [
       { path: '', component: Catalogo, title: 'FitWork | Vitrine & Loja Oficial' },
       { path: 'carrinho', component: Carrinho, title: 'FitWork | Cotação B2B & Carrinho' },
-      { path: 'pagamento', component: Pagamento, title: 'FitWork | Checkout & Faturamento B2B' },
       { path: 'login', component: Login, title: 'FitWork | Acesso Corporativo & Lojista' },
-      { path: 'perfil', component: Perfil, title: 'FitWork | Portal do Cliente & Meus Pedidos' },
+      {
+        path: 'pagamento',
+        component: Pagamento,
+        canActivate: [authGuard],
+        title: 'FitWork | Checkout & Faturamento B2B',
+      },
+      {
+        path: 'perfil',
+        component: Perfil,
+        canActivate: [authGuard],
+        title: 'FitWork | Portal do Cliente & Meus Pedidos',
+      },
     ],
   },
 
-  // ---------- área administrativa ----------
+  // ---------- área administrativa (restrita ao papel ADMIN) ----------
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [adminGuard],
+    canActivateChild: [adminGuard],
     children: [
       { path: '', component: Painel, title: 'Admin | Painel Geral' },
       { path: 'painel', redirectTo: '', pathMatch: 'full' },

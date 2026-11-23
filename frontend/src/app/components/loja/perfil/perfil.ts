@@ -78,7 +78,9 @@ export class Perfil {
   }
 
   sair(): void {
-    this.sessao.sair();
-    this.router.navigateByUrl('/loja');
+    this.sessao.sair().subscribe(() => {
+      this.notificacao.sucesso('Sessão encerrada com segurança.');
+      this.router.navigateByUrl('/loja');
+    });
   }
 }

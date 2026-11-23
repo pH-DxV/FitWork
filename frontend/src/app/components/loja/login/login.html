@@ -1,113 +1,443 @@
-<div class="max-w-[1440px] mx-auto px-space-md md:px-space-xl py-12 flex items-center justify-center">
-  <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 rounded-2xl overflow-hidden shadow-xl border border-outline-variant/30 bg-surface-container-lowest">
-    <!-- Painel Lateral Institucional Bio-Performance (5 cols) -->
-    <div class="lg:col-span-5 bg-gradient-to-br from-[#00210a] via-[#121e16] to-[#005323] text-white p-space-xl flex flex-col justify-between gap-8">
+<div class="max-w-[1440px] mx-auto px-space-md md:px-space-xl py-10 flex items-center justify-center">
+  <div
+    class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 rounded-2xl overflow-hidden shadow-xl border border-outline-variant/30 bg-surface-container-lowest"
+  >
+    <!-- Painel Lateral Institucional Bio-Performance (4 cols) -->
+    <div
+      class="lg:col-span-4 bg-gradient-to-br from-[#00210a] via-[#121e16] to-[#005323] text-white p-space-xl flex flex-col justify-between gap-8"
+    >
       <div class="flex flex-col gap-4">
-        <div class="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-white/10 text-[#95f8a7] font-label-sm text-label-sm uppercase tracking-wider">
-          <span class="material-symbols-outlined text-[15px]">verified</span>
-          <span>Portal Corporativo &amp; Varejo</span>
+        <div
+          class="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-white/10 text-[#95f8a7] font-label-sm text-label-sm uppercase tracking-wider"
+        >
+          <span class="material-symbols-outlined text-[15px]">shield_lock</span>
+          <span>IAM · OAuth 2.0 / OIDC</span>
         </div>
 
-        <h1 class="font-headline-lg text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
-          Acesse a plataforma <span class="text-[#79db8d]">FitWork B2B.</span>
+        <h1
+          class="font-headline-lg text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight"
+        >
+          Acesso seguro <span class="text-[#79db8d]">FitWork.</span>
         </h1>
 
         <p class="font-body-md text-body-md text-white/80 leading-relaxed">
-          Gerencie cotações de atacado, emita 2ª via de DANFE e boletos, e acompanhe laudos cromatográficos HPLC por lote.
+          Autenticação centralizada via Quarkus e Keycloak. Nenhuma senha é armazenada no banco de
+          dados do e-commerce.
         </p>
       </div>
 
-      <div class="flex flex-col gap-3 pt-6 border-t border-white/15 font-body-sm text-body-sm text-white/85">
+      <!-- Credenciais de homologação do Realm fitwork -->
+      <div
+        class="flex flex-col gap-2.5 p-4 rounded-xl bg-white/10 border border-white/15 font-body-sm text-body-sm text-white/90"
+      >
+        <span class="font-label-sm text-label-sm text-[#95f8a7] uppercase tracking-wider font-bold">
+          Contas pré-configuradas (Keycloak)
+        </span>
+        <button
+          type="button"
+          (click)="preencherCredencialDemo('admin@fitwork.com', 'Admin@123')"
+          class="text-left p-2 rounded-lg bg-black/25 hover:bg-black/40 transition-colors cursor-pointer"
+        >
+          <div class="flex items-center justify-between">
+            <strong class="text-[#95f8a7] text-xs">Perfil ADMIN</strong>
+            <span class="text-[11px] text-white/70 underline">Preencher</span>
+          </div>
+          <div class="font-mono text-xs text-white/90 truncate">admin@fitwork.com · Admin@123</div>
+        </button>
+
+        <button
+          type="button"
+          (click)="preencherCredencialDemo('ana.martins@fitwork.com', 'Cliente@123')"
+          class="text-left p-2 rounded-lg bg-black/25 hover:bg-black/40 transition-colors cursor-pointer"
+        >
+          <div class="flex items-center justify-between">
+            <strong class="text-[#95f8a7] text-xs">Perfil CLIENTE</strong>
+            <span class="text-[11px] text-white/70 underline">Preencher</span>
+          </div>
+          <div class="font-mono text-xs text-white/90 truncate">
+            ana.martins@fitwork.com · Cliente@123
+          </div>
+        </button>
+      </div>
+
+      <div
+        class="flex flex-col gap-2.5 pt-4 border-t border-white/15 font-body-sm text-body-sm text-white/85"
+      >
         <div class="flex items-center gap-2.5">
           <span class="material-symbols-outlined text-[18px] text-[#79db8d]">check_circle</span>
-          <span>Desconto automático de 5% no PIX</span>
+          <span>Comunicação 100% intermediada pelo Quarkus</span>
         </div>
         <div class="flex items-center gap-2.5">
           <span class="material-symbols-outlined text-[18px] text-[#79db8d]">check_circle</span>
-          <span>Rastreabilidade de lote ANVISA/MAPA</span>
+          <span>Refresh token protegido em cookie HttpOnly</span>
         </div>
         <div class="flex items-center gap-2.5">
           <span class="material-symbols-outlined text-[18px] text-[#79db8d]">check_circle</span>
-          <span>Frete expresso bonificado acima de R$ 199</span>
+          <span>Controle de acesso por papéis (ADMIN e CLIENTE)</span>
         </div>
       </div>
     </div>
 
-    <!-- Formulário de Autenticação (7 cols) -->
-    <div class="lg:col-span-7 p-space-xl flex flex-col justify-center gap-6">
+    <!-- Área do Formulário (8 cols) -->
+    <div class="lg:col-span-8 p-space-xl flex flex-col justify-center gap-5">
       <div class="flex flex-col gap-1">
         <span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">
-          Autenticação Segura
+          {{ modoCadastro() ? 'Novo Cadastro Integrado ao Keycloak' : 'Autenticação OIDC' }}
         </span>
         <h2 class="font-headline-md text-headline-md text-on-surface font-extrabold">
-          {{ modoCadastro() ? 'Criar conta de comprador' : 'Entrar na sua conta' }}
+          {{ modoCadastro() ? 'Criar conta de cliente' : 'Entrar na sua conta' }}
         </h2>
         <p class="font-body-sm text-body-sm text-on-surface-variant">
           {{
             modoCadastro()
-              ? 'Preencha seu e-mail e defina uma senha para iniciar suas cotações.'
-              : 'Use seu e-mail cadastrado para acessar seus pedidos e faturas.'
+              ? 'Seus dados cadastrais ficam no e-commerce e sua credencial de acesso é criada com segurança no Keycloak.'
+              : 'Informe seu e-mail e senha para autenticar-se junto ao servidor de identidade.'
           }}
         </p>
       </div>
 
-      <form [formGroup]="form" (ngSubmit)="entrar()" novalidate class="flex flex-col gap-3">
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>E-mail corporativo ou pessoal</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="email" placeholder="comprador@empresa.com.br" />
-          <mat-icon matPrefix>mail</mat-icon>
-          <mat-error>{{ mensagemErro('email') }}</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Senha de acesso</mat-label>
-          <input
-            matInput
-            [type]="mostrarSenha() ? 'text' : 'password'"
-            formControlName="senha"
-            autocomplete="current-password"
-          />
-          <mat-icon matPrefix>lock</mat-icon>
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="mostrarSenha.set(!mostrarSenha())"
-            [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'"
-          >
-            <mat-icon>{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-error>{{ mensagemErro('senha') }}</mat-error>
-        </mat-form-field>
-
-        <div class="flex items-center justify-between pb-2">
-          <span class="font-body-sm text-body-sm text-on-surface-variant">Mínimo de 6 caracteres</span>
-          <button
-            type="button"
-            (click)="esqueciSenha()"
-            class="font-label-md text-label-md text-primary hover:underline cursor-pointer"
-          >
-            Esqueci minha senha
-          </button>
-        </div>
-
-        <button
-          type="submit"
-          class="w-full h-12 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-md text-title-md font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+      @if (erroGeral()) {
+        <div
+          class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2"
         >
-          <span class="material-symbols-outlined text-[20px]">login</span>
-          <span>{{ modoCadastro() ? 'Concluir Cadastro & Entrar' : 'Acessar Portal FitWork' }}</span>
-        </button>
-      </form>
+          <span class="material-symbols-outlined text-base">error</span>
+          <span>{{ erroGeral() }}</span>
+        </div>
+      }
 
-      <div class="pt-4 border-t border-outline-variant/25 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
-        <span>{{ modoCadastro() ? 'Já possui credencial ativa?' : 'Ainda não tem credencial na FitWork?' }}</span>
+      @if (!modoCadastro()) {
+        <!-- ==================== FORMULÁRIO DE LOGIN ==================== -->
+        <form
+          [formGroup]="formLogin"
+          (ngSubmit)="entrar()"
+          novalidate
+          class="flex flex-col gap-3"
+        >
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>E-mail</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              placeholder="cliente@fitwork.com"
+            />
+            <mat-icon matPrefix>mail</mat-icon>
+            <mat-error>{{ mensagemErroLogin('email') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Senha de acesso</mat-label>
+            <input
+              matInput
+              [type]="mostrarSenha() ? 'text' : 'password'"
+              formControlName="senha"
+              autocomplete="current-password"
+            />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="mostrarSenha.set(!mostrarSenha())"
+              [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'"
+            >
+              <mat-icon>{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error>{{ mensagemErroLogin('senha') }}</mat-error>
+          </mat-form-field>
+
+          <button
+            type="submit"
+            [disabled]="processando()"
+            class="w-full h-12 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-md text-title-md font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <span class="material-symbols-outlined text-[20px]">login</span>
+            <span>{{ processando() ? 'Autenticando...' : 'Entrar no FitWork' }}</span>
+          </button>
+        </form>
+      } @else {
+        <!-- ==================== FORMULÁRIO DE AUTOCADASTRO ==================== -->
+        <form
+          [formGroup]="formCadastro"
+          (ngSubmit)="cadastrar()"
+          novalidate
+          class="flex flex-col gap-4"
+        >
+          <!-- 1. Credenciais e Dados Pessoais -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <mat-form-field appearance="outline" class="sm:col-span-2">
+              <mat-label>Nome completo</mat-label>
+              <input matInput formControlName="nome" maxlength="120" autocomplete="name" />
+              <mat-error>{{ mensagemErroCadastro('nome') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="sm:col-span-2">
+              <mat-label>E-mail (será seu login)</mat-label>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                maxlength="120"
+                autocomplete="email"
+              />
+              <mat-error>{{ mensagemErroCadastro('email') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Senha (mín. 8 caracteres)</mat-label>
+              <input
+                matInput
+                [type]="mostrarSenha() ? 'text' : 'password'"
+                formControlName="senha"
+                autocomplete="new-password"
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="mostrarSenha.set(!mostrarSenha())"
+                [attr.aria-label]="mostrarSenha() ? 'Ocultar senha' : 'Mostrar senha'"
+              >
+                <mat-icon>{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-hint>Maiúscula, minúscula e número</mat-hint>
+              <mat-error>{{ mensagemErroCadastro('senha') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirmar senha</mat-label>
+              <input
+                matInput
+                [type]="mostrarSenha() ? 'text' : 'password'"
+                formControlName="confirmarSenha"
+                autocomplete="new-password"
+              />
+              <mat-error>{{ mensagemErroCadastro('confirmarSenha') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>CPF</mat-label>
+              <input
+                matInput
+                formControlName="cpf"
+                placeholder="000.000.000-00"
+                (blur)="formatarCpf()"
+              />
+              <mat-error>{{ mensagemErroCadastro('cpf') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Data de nascimento</mat-label>
+              <input matInput type="date" formControlName="dataNascimento" />
+              <mat-hint>Idade mínima: {{ idadeMinima }} anos</mat-hint>
+              <mat-error>{{ mensagemErroCadastro('dataNascimento') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="sm:col-span-2">
+              <mat-label>Gênero (opcional)</mat-label>
+              <mat-select formControlName="genero">
+                <mat-option value="">Prefiro não informar</mat-option>
+                @for (g of generos; track g) {
+                  <mat-option [value]="g">{{ g }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- 2. Telefone de Contato -->
+          <div
+            class="p-3.5 rounded-xl bg-surface-container-low/60 border border-outline-variant/25 space-y-2"
+            formArrayName="telefones"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">
+                Telefone de Contato
+              </span>
+              <button
+                type="button"
+                (click)="adicionarTelefone()"
+                class="text-xs font-bold text-primary hover:underline cursor-pointer"
+              >
+                + Adicionar outro
+              </button>
+            </div>
+
+            @for (grupo of telefones.controls; track $index; let i = $index) {
+              <div [formGroupName]="i" class="grid grid-cols-12 gap-2 items-center">
+                <mat-form-field appearance="outline" class="col-span-3">
+                  <mat-label>DDD</mat-label>
+                  <input matInput formControlName="codigoArea" maxlength="2" placeholder="63" />
+                  <mat-error>{{
+                    mensagemErroCadastro('telefones.' + i + '.codigoArea')
+                  }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="col-span-5">
+                  <mat-label>Número</mat-label>
+                  <input
+                    matInput
+                    formControlName="numero"
+                    placeholder="99999-0000"
+                    (blur)="formatarNumero(i)"
+                  />
+                  <mat-error>{{ mensagemErroCadastro('telefones.' + i + '.numero') }}</mat-error>
+                </mat-form-field>
+
+                <div class="col-span-3">
+                  <mat-checkbox formControlName="whatsapp">WhatsApp</mat-checkbox>
+                </div>
+
+                <div class="col-span-1 text-right">
+                  @if (telefones.length > 1) {
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="removerTelefone(i)"
+                      aria-label="Remover telefone"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 3. Endereço com ViaCEP -->
+          <div
+            class="p-3.5 rounded-xl bg-surface-container-low/60 border border-outline-variant/25 space-y-3"
+            [formGroup]="endereco"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-title-sm text-title-sm text-on-surface font-bold">
+                Endereço de Entrega &amp; Faturamento (ViaCEP)
+              </span>
+              @if (enderecoPeloCep()) {
+                <button
+                  type="button"
+                  (click)="liberarCidadeUf()"
+                  class="text-xs font-bold text-primary hover:underline cursor-pointer"
+                >
+                  Editar cidade/UF
+                </button>
+              }
+            </div>
+
+            <div class="flex flex-wrap items-start gap-2">
+              <mat-form-field appearance="outline" class="w-48">
+                <mat-label>CEP</mat-label>
+                <input
+                  matInput
+                  formControlName="cep"
+                  placeholder="00000-000"
+                  (blur)="buscarCep()"
+                />
+                @if (buscandoCep()) {
+                  <mat-spinner matSuffix diameter="18" />
+                }
+                <mat-error>{{ mensagemErroCadastro('endereco.cep') }}</mat-error>
+              </mat-form-field>
+
+              <button
+                type="button"
+                (click)="buscarCep(true)"
+                [disabled]="buscandoCep()"
+                class="mt-1 px-3.5 py-3 rounded-lg text-xs font-bold text-white bg-primary-container hover:bg-primary transition-colors cursor-pointer"
+              >
+                Buscar CEP
+              </button>
+            </div>
+
+            @if (avisoCep()) {
+              <div
+                class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs"
+              >
+                {{ avisoCep() }}
+              </div>
+            }
+            @if (falhaRedeCep()) {
+              <div
+                class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs"
+              >
+                Não foi possível consultar o ViaCEP. Preencha o endereço manualmente.
+              </div>
+            }
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <mat-form-field appearance="outline" class="sm:col-span-9">
+                <mat-label>Logradouro</mat-label>
+                <input matInput formControlName="logradouro" maxlength="120" />
+                <mat-error>{{ mensagemErroCadastro('endereco.logradouro') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="sm:col-span-3">
+                <mat-label>Número</mat-label>
+                <input matInput formControlName="numero" maxlength="10" />
+                <mat-error>{{ mensagemErroCadastro('endereco.numero') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="sm:col-span-6">
+                <mat-label>Bairro</mat-label>
+                <input matInput formControlName="bairro" maxlength="80" />
+                <mat-error>{{ mensagemErroCadastro('endereco.bairro') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="sm:col-span-6">
+                <mat-label>Complemento</mat-label>
+                <input matInput formControlName="complemento" maxlength="60" />
+                <mat-error>{{ mensagemErroCadastro('endereco.complemento') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="sm:col-span-7">
+                <mat-label>Cidade</mat-label>
+                <input matInput formControlName="cidade" maxlength="80" />
+                <mat-error>{{ mensagemErroCadastro('endereco.cidade') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="sm:col-span-5">
+                <mat-label>Estado (UF)</mat-label>
+                <mat-select formControlName="uf">
+                  @for (estado of estados(); track estado.id) {
+                    <mat-option [value]="estado.sigla">
+                      {{ estado.sigla }} — {{ estado.nome }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-error>{{ mensagemErroCadastro('endereco.uf') }}</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-slide-toggle formControlName="aceitaNovidades">
+            Desejo receber novidades e ofertas da FitWork
+          </mat-slide-toggle>
+
+          <button
+            type="submit"
+            [disabled]="processando()"
+            class="w-full h-12 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-title-md text-title-md font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <span class="material-symbols-outlined text-[20px]">person_add</span>
+            <span>{{
+              processando() ? 'Criando conta no Keycloak...' : 'Concluir Cadastro & Entrar'
+            }}</span>
+          </button>
+        </form>
+      }
+
+      <div
+        class="pt-4 border-t border-outline-variant/25 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant"
+      >
+        <span>{{
+          modoCadastro() ? 'Já possui conta cadastrada?' : 'Ainda não possui conta na FitWork?'
+        }}</span>
         <button
           type="button"
           (click)="alternarModo()"
           class="font-title-sm text-title-sm text-primary hover:underline font-bold cursor-pointer"
         >
-          {{ modoCadastro() ? 'Fazer login' : 'Solicitar acesso / Cadastrar' }}
+          {{ modoCadastro() ? 'Fazer login' : 'Criar conta de cliente' }}
         </button>
       </div>
     </div>

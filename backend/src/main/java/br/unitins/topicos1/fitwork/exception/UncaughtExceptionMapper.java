@@ -25,6 +25,13 @@ public class UncaughtExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable t) {
+        if (t instanceof jakarta.ws.rs.ServiceUnavailableException sue) {
+            return ProblemFactory.build(baseUrl, "service-unavailable", "Serviço indisponível",
+                    Response.Status.SERVICE_UNAVAILABLE,
+                    sue.getMessage() != null ? sue.getMessage() : "O serviço solicitado está temporariamente indisponível.",
+                    uriInfo, null);
+        }
+
         // erros HTTP "conhecidos" (ex.: 400 de JSON malformado, 405) mantêm o status original
         if (t instanceof WebApplicationException wae && wae.getResponse().getStatus() < 500) {
             Response.Status status = Response.Status.fromStatusCode(wae.getResponse().getStatus());

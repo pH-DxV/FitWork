@@ -33,13 +33,15 @@
             <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
               Portal do Cliente &amp; Lojista
             </span>
+            @for (perfil of sessao.perfis(); track perfil) {
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-bold">
+                <span class="material-symbols-outlined text-[14px]">verified_user</span>
+                Papel Keycloak: {{ perfil }}
+              </span>
+            }
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] font-label-sm text-label-sm font-bold">
               <span class="material-symbols-outlined text-[14px]">workspace_premium</span>
-              Tier Ouro · Conta Homologada
-            </span>
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#dcfce7] text-[#14532d] font-label-sm text-label-sm font-semibold">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#15803d]"></span>
-              Crédito Ativo
+              Sessão OIDC Ativa
             </span>
           </div>
           <h1 class="font-headline-lg text-2xl sm:text-3xl text-on-surface font-extrabold tracking-tight">
@@ -326,12 +328,14 @@
                   Dados Pessoais e Fiscais
                 </h2>
               </div>
-              <a
-                [routerLink]="['/admin/clientes/editar', cliente.id]"
-                class="font-label-md text-label-md text-primary hover:underline font-semibold"
-              >
-                Editar no Painel Admin
-              </a>
+              @if (sessao.ehAdmin() && cliente.id) {
+                <a
+                  [routerLink]="['/admin/clientes/editar', cliente.id]"
+                  class="font-label-md text-label-md text-primary hover:underline font-semibold"
+                >
+                  Editar no Painel Admin
+                </a>
+              }
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
